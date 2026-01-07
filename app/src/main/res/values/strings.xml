@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">PillTime</string>
+    <string name="tablet">Tablet</string>
+    <string name="capsule">Capsule</string>
+    <string name="syrup">Syrup</string>
+    <string name="drops">Drops</string>
+    <string name="spray">Spray</string>
+    <string name="gel">Gel</string>
+    <string name="medication_type">Type</string>
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+    <string name="monday">Mon</string>
+    <string name="tuesday">Tue</string>
+    <string name="wednesday">Wed</string>
+    <string name="thursday">Thu</string>
+    <string name="friday">Fri</string>
+    <string name="saturday">Sat</string>
+    <string name="sunday">Sun</string>
+    <string name="new_medicaton">New Medication</string>
+    <string name="medication_name">Medication Type</string>
+    <string name="hey_bilal">Hey Bilal</string>
+    <string name="greeting">How do you feel today?</string>
+    <string name="create_new_medication">Create\nNew Schedule</string>
+    <string name="start">Start</string>
+</resources>
