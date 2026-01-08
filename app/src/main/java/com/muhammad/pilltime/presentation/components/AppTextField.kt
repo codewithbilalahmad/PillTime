@@ -3,6 +3,7 @@ package com.muhammad.pilltime.presentation.components
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,14 +35,20 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppTextField(
     modifier: Modifier = Modifier,
-    value: String, onValueChange: (String) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit = {},
     leadingIcon: Int? = null,
+    onTrailingIconClick: () -> Unit = {},
     trailingIcon: Int? = null,
+    onClick: () -> Unit = {},
     shape: Shape = CircleShape,
-    @StringRes hint: Int? = null, enabled: Boolean = true,
+    @StringRes hint: Int? = null,
+    enabled: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Done,
-    onKeyBoardAction: () -> Unit = {}, containerColor : Color = MaterialTheme.colorScheme.surfaceContainer,
+    trailingBackground: Color = MaterialTheme.colorScheme.primary,
+    onKeyBoardAction: () -> Unit = {},
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
 ) {
     BasicTextField(
         value = value,
@@ -58,12 +65,12 @@ fun AppTextField(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = shape
             )
+            .clickable(onClick = onClick)
             .then(
-                if (trailingIcon == null) Modifier.padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp
-                ) else Modifier.padding(
-                    start = 16.dp, top = 2.dp, bottom = 2.dp
+                if (trailingIcon == null) Modifier.padding(16.dp) else Modifier.padding(
+                    start = 16.dp,
+                    top = 2.dp,
+                    bottom = 2.dp
                 )
             ),
         keyboardActions = KeyboardActions(onDone = {
@@ -98,8 +105,10 @@ fun AppTextField(
                             .size(50.dp)
                             .clip(CircleShape)
                             .background(
-                                MaterialTheme.colorScheme.primary
-                            ), contentAlignment = Alignment.Center
+                                trailingBackground
+                            )
+                            .clickable(onClick = onTrailingIconClick),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(trailingIcon),

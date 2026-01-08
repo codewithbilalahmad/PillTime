@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeScreen
 
 @Composable
@@ -12,7 +13,9 @@ fun AppNavigation(navHostController: NavHostController) {
         composable<Destinations.HomeScreen>{
             HomeScreen(navHostController = navHostController)
         }
-        composable<Destinations.AddMedicationScreen>{  }
+        composable<Destinations.AddMedicationScreen>{
+            AddMedicationScreen(navHostController = navHostController)
+        }
         composable<Destinations.MedicationHistoryScreen>{  }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,7 +48,7 @@ fun MedicationTypeCard(
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(), label = "contentColor"
     )
     val shape by animateDpAsState(
-        targetValue = if (isSelected) 100.dp else 16.dp,
+        targetValue = if (isSelected) 24.dp else 16.dp,
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "shape"
     )
@@ -63,7 +64,7 @@ fun MedicationTypeCard(
         border = BorderStroke(width = 1.5.dp, color = borderColor)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

@@ -1,4 +1,4 @@
-package com.muhammad.pilltime.presentation.screens.home
+package com.muhammad.pilltime.presentation.screens.home.components
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -42,7 +43,7 @@ import com.muhammad.pilltime.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeHeader(modifier: Modifier = Modifier) {
+fun HomeHeader(modifier: Modifier = Modifier, onAddMedicationScreen : () -> Unit) {
     val context = LocalContext.current
     val isNotificationPermissionGranted by remember {
         mutableStateOf(
@@ -57,12 +58,15 @@ fun HomeHeader(modifier: Modifier = Modifier) {
         )
     }
     Column(
-        modifier = modifier.background(MaterialTheme.colorScheme.error),
+        modifier = modifier
+            .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+            .background(MaterialTheme.colorScheme.error).padding(bottom = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .padding(start = 12.dp, end = 12.dp, top = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -73,7 +77,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
             ) {
                 Box(
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.background),
                     contentAlignment = Alignment.Center
@@ -81,10 +85,10 @@ fun HomeHeader(modifier: Modifier = Modifier) {
                     Image(
                         painter = painterResource(R.drawable.user),
                         contentDescription = null,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = stringResource(R.string.hey_bilal),
                         style = MaterialTheme.typography.bodyLarge.copy(
@@ -126,7 +130,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
                     )
                 )
                 Button(
-                    onClick = {},
+                    onClick = onAddMedicationScreen,
                     shapes = ButtonDefaults.shapes(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onError,
@@ -135,7 +139,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
                 ) {
                     Text(
                         text = stringResource(R.string.start),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
@@ -143,7 +147,7 @@ fun HomeHeader(modifier: Modifier = Modifier) {
                 painter = painterResource(R.drawable.medicine_background),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(180.dp)
+                    .size(220.dp)
                     .offset(x = 36.dp)
             )
         }
