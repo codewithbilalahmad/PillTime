@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Room
 import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.data.local.PillTimeDatabase
+import com.muhammad.pilltime.data.medication_reminder.NotificationSchedulerImp
 import com.muhammad.pilltime.data.repository.MedicationRepositoryImp
 import com.muhammad.pilltime.domain.repository.MedicationRepository
+import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationViewModel
+import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
 import com.muhammad.pilltime.utils.Constants.DATABASE_NAME
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.singleOf
@@ -23,6 +26,8 @@ val appModule = module {
     single {
         get<PillTimeDatabase>().medicineDao
     }
+    singleOf(::NotificationSchedulerImp).bind<NotificationScheduler>()
     singleOf(::MedicationRepositoryImp).bind<MedicationRepository>()
+    viewModelOf(::HomeViewModel)
     viewModelOf(::AddMedicationViewModel)
 }

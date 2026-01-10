@@ -5,16 +5,19 @@ import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MedicineDto{
+interface MedicineDto {
     @Query("SELECT * FROM MedicineEntity ORDER BY createdAt DESC")
     fun getAllMedicines(): Flow<List<MedicineEntity>>
 
-    @Query("SELECT * FROM MedicineEntity WHERE id=:id")
-    suspend fun getMedicineById(id: Long): MedicineEntity?
+    @Query("SELECT * FROM MedicineEntity WHERE medicineGroupId=:groupId")
+    fun getMedicineByGroupId(groupId: Long): Flow<List<MedicineEntity>>
+
+    @Insert
+    suspend fun insertMedicine(medicineEntities: List<MedicineEntity>)
 
     @Upsert
-    suspend fun upsertMedicine(medicineEntity: MedicineEntity)
+    suspend fun updateMedicine(medicineEntity: MedicineEntity)
 
-    @Delete
-    suspend fun deleteMedicine(medicineEntity: MedicineEntity)
+    @Query("DELETE FROM MedicineEntity WHERE medicineGroupId=:groupId")
+    suspend fun deleteMedicineByGroupId(groupId: Long)
 }

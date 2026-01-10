@@ -1,24 +1,35 @@
 package com.muhammad.pilltime.presentation.screens.add_medication
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.MedicineFrequency
 import com.muhammad.pilltime.domain.model.MedicineType
 import com.muhammad.pilltime.domain.model.Schedule
 import com.muhammad.pilltime.domain.repository.MedicationRepository
+import com.muhammad.pilltime.domain.repository.NotificationScheduler
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.util.UUID
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class AddMedicationViewModel(
     private val medicationRepository: MedicationRepository,
+    private val notificationScheduler: NotificationScheduler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AddMedicationState())
     val state = _state.asStateFlow()
+    private val _events = Channel<AddMedicationEvent>()
+    val events = _events.receiveAsFlow()
     fun onAction(action: AddMedicationAction) {
         when (action) {
             is AddMedicationAction.OnMedicationNameChange -> onMedicationNameChange(action.name)
@@ -43,6 +54,27 @@ class AddMedicationViewModel(
             )
 
             AddMedicationAction.OnToggleMedicationDurationPickerDialog -> onToggleMedicationDurationPickerDialog()
+            AddMedicationAction.OnCreateMedication -> onCreateMedication()
+        }
+    }
+
+    private fun onCreateMedication() {
+        viewModelScope.launch {
+            val medication = Medicine(
+                id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
+                name = state.value.medicationName,
+                dosage = state.value.dose.toIntOrNull() ?: 1,
+                frequency = state.value.selectedMedicineFrequency,
+                startDate = state.value.startDate ?: return@launch,
+                endDate = state.value.endDate ?: return@launch,
+                medicineTaken = false,
+                createdAt = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds()),
+                medicineType = state.value.selectedMedicineType,
+                schedules = state.value.medicineSchedules
+            )
+            medicationRepository.insertMedicine(medication)
+            notificationScheduler.scheduleMedicine(medication)
+            _events.trySend(AddMedicationEvent.OnCreateMedicationSuccess(medication))
         }
     }
 

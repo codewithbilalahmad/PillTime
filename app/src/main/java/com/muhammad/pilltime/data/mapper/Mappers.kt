@@ -2,41 +2,53 @@ package com.muhammad.pilltime.data.mapper
 
 import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import com.muhammad.pilltime.domain.model.Medicine
+import com.muhammad.pilltime.domain.model.Schedule
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atDate
-import kotlinx.datetime.atTime
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
-fun MedicineEntity.toMedicine(): Medicine {
+fun List<MedicineEntity>.toMedicine(): Medicine {
     val timezone = TimeZone.currentSystemDefault()
+    val first = first()
     return Medicine(
-        id = id,
-        name = name,
-        dosage = dosage,
-        frequency = frequency,
-        medicineTaken = medicineTaken,
-        startDate = startDate?.let { Instant.fromEpochMilliseconds(it) }
-            ?.toLocalDateTime(timezone)?.date,
-        endDate = Instant.fromEpochMilliseconds(endDate).toLocalDateTime(timezone).date,
-        medicineTime = Instant.fromEpochMilliseconds(medicineTime).toLocalDateTime(timezone).time,
-        medicineType = medicineType, createdAt = Instant.fromEpochMilliseconds(createdAt)
+        id = first.medicineGroupId,
+        name = first.name,
+        dosage = first.dosage,
+        frequency = first.frequency,
+        medicineTaken = first.medicineTaken,
+        startDate = Instant.fromEpochMilliseconds(first.startDate)
+            .toLocalDateTime(timezone).date,
+        endDate = Instant.fromEpochMilliseconds(first.endDate).toLocalDateTime(timezone).date,
+        medicineType = first.medicineType,
+        createdAt = Instant.fromEpochMilliseconds(first.createdAt), schedules = map {schedule->
+            Schedule(
+                time = LocalTime(
+                    hour = schedule.medicineTime / 60,
+                    minute = schedule.medicineTime % 60,
+                )
+            )
+        }
     )
 }
 
-fun Medicine.toMedicineEntity(): MedicineEntity {
+fun Medicine.toMedicineEntities(): List<MedicineEntity> {
     val timezone = TimeZone.currentSystemDefault()
-    return MedicineEntity(
-        id = id,
-        name = name,
-        dosage = dosage,
-        frequency = frequency,
-        startDate = startDate?.atTime(medicineTime)?.toInstant(timezone)?.toEpochMilliseconds(),
-        endDate = endDate.atTime(medicineTime).toInstant(timezone).toEpochMilliseconds(),
-        medicineTaken = medicineTaken,
-        medicineTime = medicineTime.atDate(endDate).toInstant(timezone).toEpochMilliseconds(),
-        createdAt = createdAt.toEpochMilliseconds(),
-        medicineType = medicineType
-    )
+    val startMillis = startDate.atStartOfDayIn(timezone).toEpochMilliseconds()
+    val endMillis = endDate.atStartOfDayIn(timezone).toEpochMilliseconds()
+    return schedules.map { schedule ->
+         MedicineEntity(
+            medicineGroupId = id,
+            name = name,
+            dosage = dosage,
+            frequency = frequency,
+            startDate =startMillis,
+            endDate = endMillis,
+            medicineTaken = medicineTaken,
+            medicineTime = schedule.time.hour * 60 + schedule.time.minute,
+            createdAt = createdAt.toEpochMilliseconds(),
+            medicineType = medicineType
+        )
+    }
 }

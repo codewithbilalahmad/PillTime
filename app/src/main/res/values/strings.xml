@@ -52,4 +52,12 @@
     <string name="select_time">Select Time</string>
     <string name="dismiss">Dismiss</string>
     <string name="done">Done</string>
+    <string name="all_set">All Set!</string>
+    <string name="schedules">Schedules</string>
+    <string name="no_medicine_found">No Medicine found!</string>
+    <string name="no_medicine_found_description">No medicines are scheduled at the moment. Add your medication to stay on track with reminders.</string>
+    <string name="allow_notifications">Allown Notifications</string>
+    <string name="allow_notification_desp">Turn on notifications to get gentle reminders for your medicines and keep your treatment routine consistent.</string>
+    <string name="allow">Allow</string>
+    <string name="denied">Denied</string>
 </resources>

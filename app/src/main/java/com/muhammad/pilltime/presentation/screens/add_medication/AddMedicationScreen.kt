@@ -37,10 +37,12 @@ import androidx.navigation.NavHostController
 import com.muhammad.pilltime.R
 import com.muhammad.pilltime.presentation.components.AppTextField
 import com.muhammad.pilltime.presentation.components.PrimaryButton
+import com.muhammad.pilltime.presentation.navigation.Destinations
 import com.muhammad.pilltime.presentation.screens.add_medication.components.FrequencyTextField
 import com.muhammad.pilltime.presentation.screens.add_medication.components.MedicationDurationPickerDialog
 import com.muhammad.pilltime.presentation.screens.add_medication.components.MedicationTypeSection
 import com.muhammad.pilltime.presentation.screens.add_medication.components.medicationScheduleSection
+import com.muhammad.pilltime.utils.ObserveAsEvents
 import com.muhammad.pilltime.utils.formattedFullDuration
 import kotlinx.datetime.LocalTime
 import org.koin.androidx.compose.koinViewModel
@@ -54,6 +56,17 @@ fun AddMedicationScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val layoutDirection = LocalLayoutDirection.current
     val timePickerState = rememberTimePickerState(is24Hour = false)
+    ObserveAsEvents(flow = viewModel.events, onEvent = { event ->
+        when (event) {
+            is AddMedicationEvent.OnCreateMedicationSuccess -> {
+                navHostController.navigate(Destinations.AddMedicationSuccessScreen(event.medicine)) {
+                    popUpTo(Destinations.AddMedicationScreen) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+    })
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         CenterAlignedTopAppBar(
             title = {
@@ -88,7 +101,8 @@ fun AddMedicationScreen(
                 }, modifier = Modifier.fillMaxWidth(), hint = R.string.medication_name)
             }
             item("medication_duration") {
-                val formattedDuration = state.startDate?.formattedFullDuration(state.endDate!!) ?: ""
+                val formattedDuration =
+                    state.startDate?.formattedFullDuration(state.endDate!!) ?: ""
                 AppTextField(
                     value = formattedDuration,
                     onValueChange = { newValue ->
@@ -153,7 +167,9 @@ fun AddMedicationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),
-                    onClick = {},
+                    onClick = {
+                        viewModel.onAction(AddMedicationAction.OnCreateMedication)
+                    }, enabled = state.isNextButtonEnabled,
                     contentPadding = PaddingValues(vertical = 16.dp)
                 )
             }

@@ -22,4 +22,6 @@ data class AddMedicationState(
     val showFrequencyOptionsDropdown : Boolean = false,
     val selectedScheduleId : String?=null,
     val selectedMedicineFrequency: MedicineFrequency = MedicineFrequency.EVERYDAY,
-)
+){
+    val isNextButtonEnabled  : Boolean = medicationName.isNotEmpty() && medicineSchedules.isNotEmpty() && startDate != null && endDate != null
+}

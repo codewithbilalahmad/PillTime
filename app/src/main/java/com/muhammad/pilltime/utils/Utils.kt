@@ -1,6 +1,11 @@
 package com.muhammad.pilltime.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import com.muhammad.pilltime.domain.model.RelativePosition
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -65,4 +70,22 @@ fun LocalDate.formattedFullDuration(otherDate : LocalDate) : String{
     val endYear = endDate.year
     val isSameYear = startYear == endYear
     return "$startDay $startMonth${if(isSameYear) "" else " $startYear"} - $endDay $endMonth $endYear"
+}
+
+fun <T> List<T>.relativePosition(item : T) : RelativePosition{
+    val index = indexOf(item)
+    return when{
+        size == 1 -> RelativePosition.SINGLE_ENTRY
+        index == 0 -> RelativePosition.FIRST
+        index == lastIndex -> RelativePosition.LAST
+        else -> RelativePosition.IN_BETWEEN
+    }
+}
+
+fun openAppSettings(context : Context){
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+    context.startActivity(intent)
 }

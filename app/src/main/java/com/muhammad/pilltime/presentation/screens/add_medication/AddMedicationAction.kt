@@ -11,11 +11,14 @@ sealed interface AddMedicationAction {
     data class OnDeleteSchedule(val id: String) : AddMedicationAction
     data object OnAddSchedule : AddMedicationAction
     data object OnToggleMedicationDurationPickerDialog : AddMedicationAction
-    data class OnSelectMedicationDuration(val startDate : LocalDate, val endDate : LocalDate) : AddMedicationAction
+    data class OnSelectMedicationDuration(val startDate: LocalDate, val endDate: LocalDate) :
+        AddMedicationAction
+
     data class OnScheduleTimeChange(val time: LocalTime) : AddMedicationAction
-    data class OnShowScheduleTimePickerDialog(val id : String) : AddMedicationAction
+    data class OnShowScheduleTimePickerDialog(val id: String) : AddMedicationAction
     data object OnDismissScheduleTimePickerDialog : AddMedicationAction
     data class OnSelectMedicineType(val type: MedicineType) : AddMedicationAction
     data object OnToggleFrequencyOptionsDropdown : AddMedicationAction
     data class OnSelectMedicationFrequency(val frequency: MedicineFrequency) : AddMedicationAction
+    data object OnCreateMedication : AddMedicationAction
 }

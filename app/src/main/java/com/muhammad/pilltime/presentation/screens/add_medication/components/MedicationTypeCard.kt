@@ -36,11 +36,11 @@ fun MedicationTypeCard(
 ) {
     val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
     val containerColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        targetValue = if (isSelected) type.color else Color.Transparent,
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(), label = "containerColor"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+        targetValue = if (isSelected) type.color else MaterialTheme.colorScheme.surface,
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(), label = "borderColor"
     )
     val contentColor by animateColorAsState(
