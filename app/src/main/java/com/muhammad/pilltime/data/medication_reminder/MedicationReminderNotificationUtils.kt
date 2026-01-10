@@ -38,28 +38,46 @@ fun createMedicationReminderNotification(
 ) {
     createMedicationReminderNotificationChannel(context)
     val notificationId = System.currentTimeMillis().toInt()
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val activityIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
-    val bigIcon = MedicineType.valueOf(medicineType.uppercase()).icon
+    val type = MedicineType.valueOf(medicineType.uppercase())
     val activityPendingIntent = PendingIntent.getActivity(
         context,
         REMINDER_ACTIVITY_REQUEST_CODE,
         activityIntent,
         PendingIntent.FLAG_IMMUTABLE
     )
-    val builder = NotificationCompat.Builder(context, REMINDER_CHANNEL_ID).setSmallIcon(R.drawable.ic_logo)
-            .setContentTitle("Medication Reminder")
+    val dosageUnit = when (type) {
+        MedicineType.TABLET,
+        MedicineType.CAPSULE,
+            -> "tablet"
+
+        MedicineType.SYRUP -> "spoon"
+
+        MedicineType.DROPS -> "drops"
+
+        MedicineType.Spray -> "spray"
+
+        MedicineType.GEL -> "application"
+    }
+    val builder =
+        NotificationCompat.Builder(context, REMINDER_CHANNEL_ID).setSmallIcon(R.drawable.ic_logo)
+            .setContentTitle("$medicineName Reminder")
             .setContentIntent(activityPendingIntent)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    "Time to take $dose Dose of $medicineName $medicineType"
+                    "Time to take $dose $dosageUnit of $medicineName $medicineType"
                 )
             )
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources,bigIcon))
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, type.icon))
             .setContentText("Time to take $dose Dose of $medicineName $medicineType").setPriority(
                 NotificationCompat.PRIORITY_HIGH
-            ).setCategory(NotificationCompat.CATEGORY_REMINDER).setAutoCancel(true)
+            ).addAction(R.drawable.ic_done, "Done", activityPendingIntent)
+            .addAction(R.drawable.ic_missed, "Missed", activityPendingIntent).setCategory(
+            NotificationCompat.CATEGORY_REMINDER
+        ).setAutoCancel(true)
     notificationManager.notify(notificationId, builder.build())
 }

@@ -75,7 +75,7 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel = 
                 start = paddingValues.calculateLeftPadding(layoutDirection = layoutDirection),
                 end = paddingValues.calculateEndPadding(layoutDirection = layoutDirection),
                 bottom = paddingValues.calculateBottomPadding(),
-            )
+            ), verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item("HomeHeader") {
                 HomeHeader(

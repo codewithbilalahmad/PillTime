@@ -12,5 +12,5 @@ enum class MedicineType(@get:StringRes val label : Int, val icon : Int, val colo
     SYRUP(R.string.syrup, icon = R.drawable.ic_syrup, color =  Color(0xFFBA68C8)),
     DROPS(R.string.drops, icon = R.drawable.ic_drops, color = Color(0xFF4DD0E1)),
     Spray(R.string.spray, icon = R.drawable.ic_spray, color = Color(0xFF4DB6AC)),
-    GEL(R.string.gel, icon = R.drawable.ic_gel, color = Color(0xFFE57373))
+    GEL(R.string.gel, icon = R.drawable.ic_gel, color = Color(0xFFF06292))
 }

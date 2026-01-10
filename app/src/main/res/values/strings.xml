@@ -60,4 +60,7 @@
     <string name="allow_notification_desp">Turn on notifications to get gentle reminders for your medicines and keep your treatment routine consistent.</string>
     <string name="allow">Allow</string>
     <string name="denied">Denied</string>
+    <string name="dose">Dose</string>
+    <string name="spoon">Spoon</string>
+    <string name="application">Application</string>
 </resources>

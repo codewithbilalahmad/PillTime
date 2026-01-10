@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.muhammad.pilltime.R
 import com.muhammad.pilltime.domain.model.Medicine
+import com.muhammad.pilltime.domain.model.MedicineType
 import com.muhammad.pilltime.domain.model.RelativePosition
 import com.muhammad.pilltime.presentation.components.DashedVerticalDivider
 import com.muhammad.pilltime.utils.formattedFullDuration
@@ -111,6 +112,36 @@ fun MedicationCard(
                     maxLines = 1,
                     overflow = TextOverflow.Clip
                 )
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ){
+                    val dosageUnit = when (medicine.medicineType) {
+                        MedicineType.TABLET,
+                        MedicineType.CAPSULE,
+                            -> R.string.dose
+
+                        MedicineType.SYRUP -> R.string.spoon
+
+                        MedicineType.DROPS -> R.string.drops
+
+                        MedicineType.Spray -> R.string.spray
+
+                        MedicineType.GEL -> R.string.application
+                    }
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_goal),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.surface
+                    )
+                    Text(
+                        text = "${medicine.dosage} ${stringResource(dosageUnit)}",
+                        style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.surface, fontWeight = FontWeight.Bold)
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

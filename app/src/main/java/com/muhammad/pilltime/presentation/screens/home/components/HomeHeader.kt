@@ -56,8 +56,7 @@ fun HomeHeader(modifier: Modifier = Modifier, onAddMedicationScreen: () -> Unit)
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
-            .background(MaterialTheme.colorScheme.error)
-            .padding(bottom = 8.dp),
+            .background(MaterialTheme.colorScheme.error),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
