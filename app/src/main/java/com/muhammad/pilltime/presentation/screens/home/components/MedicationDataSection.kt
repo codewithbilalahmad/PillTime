@@ -26,7 +26,7 @@ import kotlinx.datetime.LocalDate
 
 fun LazyListScope.medicationDataSection(
     medications: List<Medicine>,
-    selectedDate: LocalDate?,
+    selectedDate: LocalDate?,onToggleMedicineSchedules : (Long) -> Unit,
     onDateSelected: (LocalDate) -> Unit,
 ) {
     item("WeekCalendar") {
@@ -68,13 +68,15 @@ fun LazyListScope.medicationDataSection(
             }
         }
     } else {
-        items(medications, key = { it.id }) { medicine ->
+        items(medications, key = { it.id }, contentType = {
+            "medicine_${it.id}"
+        }) { medicine ->
             MedicationCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .animateItem(),
-                medicine = medicine,
+                medicine = medicine, onToggleMedicineSchedules = onToggleMedicineSchedules,
                 relativePosition = medications.relativePosition(medicine)
             )
         }

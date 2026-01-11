@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.MedicineFrequency
+import com.muhammad.pilltime.domain.model.MedicineSchedule
 import com.muhammad.pilltime.domain.model.MedicineType
-import com.muhammad.pilltime.domain.model.Schedule
+import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
+import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,12 +20,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 class AddMedicationViewModel(
     private val medicationRepository: MedicationRepository,
+    private val medicationScheduleRepository: MedicationScheduleRespository,
     private val notificationScheduler: NotificationScheduler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AddMedicationState())
@@ -58,21 +60,28 @@ class AddMedicationViewModel(
         }
     }
 
+    private fun onUpdateMedicineScheduleStatus(
+        scheduleId: Long,
+        status: ScheduleStatus
+    ) {
+
+    }
+
     private fun onCreateMedication() {
         viewModelScope.launch {
             val medication = Medicine(
-                id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
+                id = state.value.currentMedicineId,
                 name = state.value.medicationName,
                 dosage = state.value.dose.toIntOrNull() ?: 1,
                 frequency = state.value.selectedMedicineFrequency,
                 startDate = state.value.startDate ?: return@launch,
                 endDate = state.value.endDate ?: return@launch,
-                medicineTaken = false,
                 createdAt = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds()),
                 medicineType = state.value.selectedMedicineType,
                 schedules = state.value.medicineSchedules
             )
             medicationRepository.insertMedicine(medication)
+            medicationScheduleRepository.insertMedicineSchedules(schedules = medication.schedules)
             notificationScheduler.scheduleMedicine(medication)
             _events.trySend(AddMedicationEvent.OnCreateMedicationSuccess(medication))
         }
@@ -109,7 +118,7 @@ class AddMedicationViewModel(
         }
     }
 
-    private fun onShowScheduleTimePickerDialog(id: String) {
+    private fun onShowScheduleTimePickerDialog(id: Long) {
         _state.update {
             it.copy(
                 showScheduleTimePickerDialog = true,
@@ -119,13 +128,14 @@ class AddMedicationViewModel(
     }
 
     private fun onAddSchedule() {
-        val schedule = Schedule(
-            time = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+        val schedule = MedicineSchedule(
+            time = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time,
+            medicineId = state.value.currentMedicineId
         )
         _state.update { it.copy(medicineSchedules = it.medicineSchedules + schedule) }
     }
 
-    private fun onDeleteSchedule(id: String) {
+    private fun onDeleteSchedule(id: Long) {
         _state.update {
             it.copy(medicineSchedules = it.medicineSchedules.filter { schedule ->
                 schedule.id != id

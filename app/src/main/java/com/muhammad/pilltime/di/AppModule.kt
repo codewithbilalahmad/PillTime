@@ -6,7 +6,9 @@ import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.data.local.PillTimeDatabase
 import com.muhammad.pilltime.data.medication_reminder.NotificationSchedulerImp
 import com.muhammad.pilltime.data.repository.MedicationRepositoryImp
+import com.muhammad.pilltime.data.repository.MedicationScheduleRespositoryImp
 import com.muhammad.pilltime.domain.repository.MedicationRepository
+import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationViewModel
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
@@ -26,8 +28,12 @@ val appModule = module {
     single {
         get<PillTimeDatabase>().medicineDao
     }
+    single {
+        get<PillTimeDatabase>().medicineScheduleDao
+    }
     singleOf(::NotificationSchedulerImp).bind<NotificationScheduler>()
     singleOf(::MedicationRepositoryImp).bind<MedicationRepository>()
+    singleOf(::MedicationScheduleRespositoryImp).bind<MedicationScheduleRespository>()
     viewModelOf(::HomeViewModel)
     viewModelOf(::AddMedicationViewModel)
 }

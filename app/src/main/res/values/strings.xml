@@ -63,4 +63,6 @@
     <string name="dose">Dose</string>
     <string name="spoon">Spoon</string>
     <string name="application">Application</string>
+    <string name="pending">Pending</string>
+    <string name="missed">Missed</string>
 </resources>

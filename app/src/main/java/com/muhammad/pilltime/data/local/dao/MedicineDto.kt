@@ -1,6 +1,9 @@
 package com.muhammad.pilltime.data.local.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -9,15 +12,15 @@ interface MedicineDto {
     @Query("SELECT * FROM MedicineEntity ORDER BY createdAt DESC")
     fun getAllMedicines(): Flow<List<MedicineEntity>>
 
-    @Query("SELECT * FROM MedicineEntity WHERE medicineGroupId=:groupId")
-    fun getMedicineByGroupId(groupId: Long): Flow<List<MedicineEntity>>
-
     @Insert
-    suspend fun insertMedicine(medicineEntities: List<MedicineEntity>)
+    suspend fun insertMedicine(medicineEntity: MedicineEntity)
 
-    @Upsert
+    @Update
     suspend fun updateMedicine(medicineEntity: MedicineEntity)
 
-    @Query("DELETE FROM MedicineEntity WHERE medicineGroupId=:groupId")
-    suspend fun deleteMedicineByGroupId(groupId: Long)
+    @Query("SELECT * FROM MedicineEntity WHERE id=:id")
+    fun getMedicineById(id : Long) : Flow<MedicineEntity?>
+
+    @Query("DELETE FROM MedicineEntity WHERE id=:id")
+    suspend fun deleteMedicineById(id: Long)
 }

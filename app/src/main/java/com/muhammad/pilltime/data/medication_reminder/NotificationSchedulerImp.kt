@@ -2,15 +2,16 @@ package com.muhammad.pilltime.data.medication_reminder
 
 import android.content.Context
 import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.toDatePeriod
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.utils.Constants.DOSE
+import com.muhammad.pilltime.utils.Constants.MEDICINE_ID
 import com.muhammad.pilltime.utils.Constants.MEDICINE_NAME
 import com.muhammad.pilltime.utils.Constants.MEDICINE_TYPE
+import com.muhammad.pilltime.utils.Constants.SCHEDULE_ID
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.plus
@@ -36,6 +37,7 @@ class NotificationSchedulerImp(
                 if (delayMillis > 0) {
                     enqueueWorker(
                        medicine =  medicine,
+                        scheduleId = schedule.id,
                         delayMillis = delayMillis
                     )
                 }
@@ -46,10 +48,11 @@ class NotificationSchedulerImp(
 
     private fun enqueueWorker(
         medicine: Medicine,
+        scheduleId : Long,
         delayMillis: Long,
     ) {
-        val data = Data.Builder().putString(MEDICINE_NAME, medicine.name)
-                .putInt(DOSE, medicine.dosage).putString(
+        val data = Data.Builder().putLong(MEDICINE_ID, medicine.id).putString(MEDICINE_NAME, medicine.name)
+                .putInt(DOSE, medicine.dosage).putLong(SCHEDULE_ID, scheduleId).putString(
                     MEDICINE_TYPE,
                     medicine.medicineType.name.lowercase().replaceFirstChar { it.uppercase() })
                 .build()

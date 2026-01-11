@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
-import com.muhammad.pilltime.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,19 +35,35 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.muhammad.pilltime.R
 import com.muhammad.pilltime.presentation.components.AppAlertDialog
 import com.muhammad.pilltime.presentation.navigation.Destinations
 import com.muhammad.pilltime.presentation.screens.home.components.HomeHeader
 import com.muhammad.pilltime.presentation.screens.home.components.medicationDataSection
+import com.muhammad.pilltime.utils.ObserveAsEvents
 import com.muhammad.pilltime.utils.openAppSettings
-import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel = koinViewModel()) {
+fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val context = LocalContext.current
     val activity = context as Activity
     val layoutDirection = LocalLayoutDirection.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    ObserveAsEvents(viewModel.events, onEvent = {event ->
+        when(event){
+            is HomeEvent.ScrollToMedicine -> {
+                val index = state.medications.indexOfFirst { it.id == event.medicineId }
+                if (index != -1) {
+                    scope.launch {
+                        listState.animateScrollToItem(index + 1)
+                    }
+                }
+            }
+        }
+    })
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             val isNotificationPermissionPermanentlyDenied =
@@ -75,7 +94,7 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel = 
                 start = paddingValues.calculateLeftPadding(layoutDirection = layoutDirection),
                 end = paddingValues.calculateEndPadding(layoutDirection = layoutDirection),
                 bottom = paddingValues.calculateBottomPadding(),
-            ), verticalArrangement = Arrangement.spacedBy(8.dp)
+            ), state = listState, verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item("HomeHeader") {
                 HomeHeader(
@@ -90,6 +109,8 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel = 
                 medications = state.medications,
                 onDateSelected = { date ->
                     viewModel.onAction(HomeAction.OnFilterDataSelected(date))
+                }, onToggleMedicineSchedules = {medicineId ->
+                    viewModel.onAction(HomeAction.OnToggleMedicineSchedules(medicineId))
                 },
                 selectedDate = state.selectedFilterDate
             )

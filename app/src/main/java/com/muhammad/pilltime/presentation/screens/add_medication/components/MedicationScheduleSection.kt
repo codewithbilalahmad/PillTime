@@ -12,17 +12,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.muhammad.pilltime.R
-import com.muhammad.pilltime.domain.model.Schedule
+import com.muhammad.pilltime.domain.model.MedicineSchedule
 import com.muhammad.pilltime.presentation.components.AppTextField
 import com.muhammad.pilltime.utils.formattedTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 fun LazyListScope.medicationScheduleSection(
-    schedules: List<Schedule>,
+    schedules: List<MedicineSchedule>,
     onAddSchedule: () -> Unit,
-    onDeleteSchedule: (String) -> Unit,
+    onDeleteSchedule: (Long) -> Unit,
     dose: String,
-    onShowScheduleTimePickerDialog: (Schedule) -> Unit,
+    onShowScheduleTimePickerDialog: (MedicineSchedule) -> Unit,
     onDoseChange: (String) -> Unit,
 ) {
     item("schedule_header") {

@@ -15,9 +15,9 @@ data class Medicine(
     val frequency : MedicineFrequency,
     val startDate : LocalDate,
     val endDate : LocalDate,
-    val medicineTaken : Boolean,
+    val showMedicineSchedule : Boolean = false,
     @Contextual
     val createdAt : Instant,
-    val schedules : List<Schedule>,
+    val schedules : List<MedicineSchedule>,
     val medicineType : MedicineType
 )

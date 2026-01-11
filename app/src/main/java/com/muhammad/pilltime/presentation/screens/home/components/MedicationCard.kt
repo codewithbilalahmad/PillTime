@@ -28,7 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +43,9 @@ import com.muhammad.pilltime.R
 import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.MedicineType
 import com.muhammad.pilltime.domain.model.RelativePosition
+import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.presentation.components.DashedVerticalDivider
+import com.muhammad.pilltime.presentation.theme.Green
 import com.muhammad.pilltime.utils.formattedFullDuration
 import com.muhammad.pilltime.utils.formattedTime
 
@@ -51,10 +53,9 @@ import com.muhammad.pilltime.utils.formattedTime
 @Composable
 fun MedicationCard(
     modifier: Modifier = Modifier,
-    medicine: Medicine,
+    medicine: Medicine,onToggleMedicineSchedules : (Long) -> Unit,
     relativePosition: RelativePosition,
 ) {
-    var showSchedules by remember { mutableStateOf(false) }
     Row(modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
             if (relativePosition != RelativePosition.SINGLE_ENTRY) {
@@ -170,7 +171,7 @@ fun MedicationCard(
                     )
                     IconButton(
                         onClick = {
-                            showSchedules = !showSchedules
+                            onToggleMedicineSchedules(medicine.id)
                         },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -178,8 +179,7 @@ fun MedicationCard(
                         ),
                         modifier = Modifier.size(IconButtonDefaults.extraSmallContainerSize())
                     ) {
-                        val icon =
-                            if (showSchedules) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
+                        val icon = if (medicine.showMedicineSchedule) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
                         Icon(
                             imageVector = ImageVector.vectorResource(icon),
                             contentDescription = null,
@@ -188,24 +188,29 @@ fun MedicationCard(
                     }
                 }
                 AnimatedVisibility(
-                    visible = showSchedules,
+                    visible = medicine.showMedicineSchedule,
                     enter = slideInVertically(animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()) { -it } + expandVertically(
                         animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()
                     ) { -it },
                     exit = slideOutVertically(animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()) { -it } + shrinkVertically(
                         animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()
                     ) { -it }) {
-                    Spacer(Modifier.height(8.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Spacer(Modifier.height(8.dp))
                         medicine.schedules.forEach { schedule ->
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.Center
                             ) {
+                                val contentColor = when(schedule.status){
+                                    ScheduleStatus.PENDING -> MaterialTheme.colorScheme.primary
+                                    ScheduleStatus.DONE -> Green
+                                    ScheduleStatus.MISSED -> MaterialTheme.colorScheme.error
+                                }
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_time),
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.surface,
+                                    tint = contentColor,
                                     modifier = Modifier
                                         .size(22.dp)
                                         .align(Alignment.CenterStart)
@@ -214,8 +219,16 @@ fun MedicationCard(
                                     text = schedule.time.formattedTime(),
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.surface
+                                        color = contentColor
                                     )
+                                )
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(schedule.status.icon),
+                                    contentDescription = null,
+                                    tint = contentColor,
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .align(Alignment.CenterEnd)
                                 )
                             }
                         }

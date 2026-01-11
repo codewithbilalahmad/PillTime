@@ -9,13 +9,14 @@ import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationScreen
 import com.muhammad.pilltime.presentation.screens.add_medication_success.AddMedicationSuccessScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeScreen
+import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
 import kotlin.reflect.typeOf
 
 @Composable
-fun AppNavigation(navHostController: NavHostController) {
+fun AppNavigation(navHostController: NavHostController, homeViewModel: HomeViewModel) {
     NavHost(navController = navHostController, startDestination = Destinations.HomeScreen) {
         composable<Destinations.HomeScreen>{
-            HomeScreen(navHostController = navHostController)
+            HomeScreen(navHostController = navHostController, viewModel = homeViewModel)
         }
         composable<Destinations.AddMedicationScreen>{
             AddMedicationScreen(navHostController = navHostController)

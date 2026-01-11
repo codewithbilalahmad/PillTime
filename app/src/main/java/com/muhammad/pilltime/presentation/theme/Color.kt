@@ -2,6 +2,9 @@ package com.muhammad.pilltime.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
+
+val Green = Color(0xFF81C784)
+
 val Primary40 = Color(0xFF0057CC)
 val Primary50 = Color(0xFF1F70F5)
 val Primary60 = Color(0xFF578CFF)
