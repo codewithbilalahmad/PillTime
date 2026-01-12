@@ -8,6 +8,7 @@ import kotlin.time.Clock
 
 data class HomeState(
     val medications: List<Medicine> = emptyList(),
+    val expandedMedicineIds : Set<Long> = emptySet(),
     val selectedFilterDate: LocalDate = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault()).date,
     val isNotificationPermanentlyDenied : Boolean = false,

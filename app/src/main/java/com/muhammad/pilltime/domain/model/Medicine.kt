@@ -16,6 +16,7 @@ data class Medicine(
     val startDate : LocalDate,
     val endDate : LocalDate,
     val showMedicineSchedule : Boolean = false,
+    val selectedDateProgress : Float = 0f,
     @Contextual
     val createdAt : Instant,
     val schedules : List<MedicineSchedule>,

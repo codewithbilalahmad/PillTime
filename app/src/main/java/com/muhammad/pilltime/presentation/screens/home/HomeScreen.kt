@@ -111,6 +111,8 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
                     viewModel.onAction(HomeAction.OnFilterDataSelected(date))
                 }, onToggleMedicineSchedules = {medicineId ->
                     viewModel.onAction(HomeAction.OnToggleMedicineSchedules(medicineId))
+                }, onDeleteMedicine = {medicineId ->
+                    viewModel.onAction(HomeAction.OnDeleteMedicineById(medicineId))
                 },
                 selectedDate = state.selectedFilterDate
             )

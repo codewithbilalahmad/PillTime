@@ -19,4 +19,8 @@ interface MedicineScheduleDao {
         "UPDATE MedicineScheduleEntity SET status =:status WHERE id =:scheduleId"
     )
     suspend fun updateMedicineScheduleStatus(status : ScheduleStatus, scheduleId : Long)
+    @Query(
+        "DELETE FROM MedicineScheduleEntity WHERE medicineId =:medicineId"
+    )
+    suspend fun deleteMedicineSchedulesByMedicineId(medicineId : Long)
 }

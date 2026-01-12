@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
+import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,16 +18,28 @@ import kotlinx.datetime.LocalDate
 
 class HomeViewModel(
     private val medicationRepository: MedicationRepository,
+    private val notificationScheduler: NotificationScheduler,
     private val medicationScheduleRepository: MedicationScheduleRespository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = combine(
         _state, medicationRepository.getAllMedicines()
     ) { state, medications ->
-        val filteredMedication = medications.filter { medicine ->
-            state.selectedFilterDate >= medicine.startDate && state.selectedFilterDate <= medicine.endDate
+        val filtered = medications.filter {medicine ->
+            state.selectedFilterDate in medicine.startDate..medicine.endDate && medicine.schedules.any { it.date == state.selectedFilterDate }
+        }.map { medicine ->
+            val scheduleForDate = medicine.schedules.filter { it.date == state.selectedFilterDate }
+            val doneCount = scheduleForDate.count {
+                it.status == ScheduleStatus.DONE
+            }
+            val totalCount = scheduleForDate.size
+            medicine.copy(
+                schedules = scheduleForDate,
+                showMedicineSchedule = state.expandedMedicineIds.contains(medicine.id),
+                selectedDateProgress = if (totalCount == 0) 0f else doneCount.toFloat() / totalCount
+            )
         }
-        state.copy(medications = filteredMedication)
+        state.copy(medications = filtered)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeState())
     private val _events = Channel<HomeEvent>()
     val events = _events.receiveAsFlow()
@@ -42,18 +55,27 @@ class HomeViewModel(
             )
 
             is HomeAction.OnToggleMedicineSchedules -> onToggleMedicineSchedules(action.medicineId)
+            is HomeAction.OnDeleteMedicineById -> onDeleteMedicineById(action.medicineId)
+        }
+    }
+
+    private fun onDeleteMedicineById(medicineId: Long) {
+        viewModelScope.launch {
+            medicationRepository.deleteMedicineById(medicineId)
+            medicationScheduleRepository.deleteMedicineSchedulesByMedicineId(medicineId)
+            notificationScheduler.cancelMedicine(medicineId)
         }
     }
 
     private fun onToggleMedicineSchedules(medicineId: Long) {
         _state.update {
-            it.copy(
-                medications = it.medications.map { medicine ->
-                    if(medicine.id == medicineId){
-                        medicine.copy(showMedicineSchedule = !medicine.showMedicineSchedule)
-                    } else medicine
-                }
-            )
+            val expanded = it.expandedMedicineIds.toMutableSet()
+            if (expanded.contains(medicineId)) {
+                expanded.remove(medicineId)
+            } else {
+                expanded.add(medicineId)
+            }
+            it.copy(expandedMedicineIds = expanded)
         }
     }
 
@@ -69,6 +91,7 @@ class HomeViewModel(
             )
         }
         _events.trySend(HomeEvent.ScrollToMedicine(medicineId = medicineId))
+        onAction(HomeAction.OnToggleMedicineSchedules(medicineId = medicineId))
     }
 
     private fun onNotificationPermissionPermanentlyDenied() {

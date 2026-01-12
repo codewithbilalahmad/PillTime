@@ -17,7 +17,7 @@ fun DashedVerticalDivider(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.surfaceVariant,
     dashHeight: Dp = 6.dp,
-    thickness: Dp = 2.dp,
+    thickness: Dp = 1.5.dp,
     gapHeight: Dp = 4.dp,
 ) {
     Canvas(modifier = modifier

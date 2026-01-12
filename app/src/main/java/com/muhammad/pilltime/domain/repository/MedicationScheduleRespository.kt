@@ -8,4 +8,5 @@ interface MedicationScheduleRespository {
     suspend fun insertMedicineSchedules(schedules: List<MedicineSchedule>)
     fun getMedicineSchedules(medicineId: Long): Flow<List<MedicineSchedule>>
     suspend fun updateMedicineScheduleStatus(status : ScheduleStatus, scheduleId : Long)
+    suspend fun deleteMedicineSchedulesByMedicineId(medicineId: Long)
 }

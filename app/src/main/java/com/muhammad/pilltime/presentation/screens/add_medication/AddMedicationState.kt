@@ -23,7 +23,7 @@ data class AddMedicationState(
     val selectedMedicineFrequency: MedicineFrequency = MedicineFrequency.EVERYDAY,
     val medicineSchedules : List<MedicineSchedule> = listOf(
         MedicineSchedule(time = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time, medicineId = currentMedicineId)
-    ).reversed()
+    ).reversed(), val isCreatingMedicine : Boolean = false
 ){
     val isNextButtonEnabled  : Boolean = medicationName.isNotEmpty() && medicineSchedules.isNotEmpty() && startDate != null && endDate != null
 }

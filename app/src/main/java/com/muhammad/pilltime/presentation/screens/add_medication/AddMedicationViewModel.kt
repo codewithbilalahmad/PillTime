@@ -6,10 +6,10 @@ import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.MedicineFrequency
 import com.muhammad.pilltime.domain.model.MedicineSchedule
 import com.muhammad.pilltime.domain.model.MedicineType
-import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
+import com.muhammad.pilltime.utils.buildDatedSchedules
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,15 +60,19 @@ class AddMedicationViewModel(
         }
     }
 
-    private fun onUpdateMedicineScheduleStatus(
-        scheduleId: Long,
-        status: ScheduleStatus
-    ) {
-
-    }
-
     private fun onCreateMedication() {
         viewModelScope.launch {
+            _state.update { it.copy(isCreatingMedicine = true) }
+            val startDate = state.value.startDate ?: return@launch
+            val endDate = state.value.endDate ?: return@launch
+            val medicineId = state.value.currentMedicineId
+            val datedSchedules = buildDatedSchedules(
+                medicineId = medicineId,
+                startDate = startDate,
+                endDate = endDate,
+                frequency = state.value.selectedMedicineFrequency,
+                baseSchedules = state.value.medicineSchedules
+            )
             val medication = Medicine(
                 id = state.value.currentMedicineId,
                 name = state.value.medicationName,
@@ -78,11 +82,12 @@ class AddMedicationViewModel(
                 endDate = state.value.endDate ?: return@launch,
                 createdAt = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds()),
                 medicineType = state.value.selectedMedicineType,
-                schedules = state.value.medicineSchedules
+                schedules = datedSchedules
             )
             medicationRepository.insertMedicine(medication)
-            medicationScheduleRepository.insertMedicineSchedules(schedules = medication.schedules)
+            medicationScheduleRepository.insertMedicineSchedules(datedSchedules)
             notificationScheduler.scheduleMedicine(medication)
+            _state.update { it.copy(isCreatingMedicine = false) }
             _events.trySend(AddMedicationEvent.OnCreateMedicationSuccess(medication))
         }
     }

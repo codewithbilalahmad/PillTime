@@ -13,7 +13,7 @@ import com.muhammad.pilltime.data.local.entity.MedicineScheduleEntity
 
 @Database(
     entities = [MedicineEntity::class, MedicineScheduleEntity::class],
-    version = 5,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(

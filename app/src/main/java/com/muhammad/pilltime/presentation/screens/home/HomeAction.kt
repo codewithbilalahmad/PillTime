@@ -10,4 +10,5 @@ sealed interface HomeAction{
     data object OnNotificationPermissionPermanentlyDenied : HomeAction
     data class OnUpdateMedicineScheduleStatus(val scheduleId: Long,val medicineId : Long, val status: ScheduleStatus) : HomeAction
     data class OnToggleMedicineSchedules(val medicineId : Long) : HomeAction
+    data class OnDeleteMedicineById(val medicineId : Long) : HomeAction
 }

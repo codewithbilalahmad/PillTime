@@ -25,7 +25,7 @@ import com.muhammad.pilltime.utils.relativePosition
 import kotlinx.datetime.LocalDate
 
 fun LazyListScope.medicationDataSection(
-    medications: List<Medicine>,
+    medications: List<Medicine>,onDeleteMedicine : (Long) -> Unit,
     selectedDate: LocalDate?,onToggleMedicineSchedules : (Long) -> Unit,
     onDateSelected: (LocalDate) -> Unit,
 ) {
@@ -63,7 +63,7 @@ fun LazyListScope.medicationDataSection(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.surface
-                    )
+                    ), modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         }
@@ -76,7 +76,7 @@ fun LazyListScope.medicationDataSection(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .animateItem(),
-                medicine = medicine, onToggleMedicineSchedules = onToggleMedicineSchedules,
+                medicine = medicine, onDeleteMedicine = onDeleteMedicine, onToggleMedicineSchedules = onToggleMedicineSchedules,
                 relativePosition = medications.relativePosition(medicine)
             )
         }

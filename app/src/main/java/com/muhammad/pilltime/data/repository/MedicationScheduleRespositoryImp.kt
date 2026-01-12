@@ -32,4 +32,8 @@ class MedicationScheduleRespositoryImp(
     ) {
         medicineScheduleDao.updateMedicineScheduleStatus(status = status, scheduleId = scheduleId)
     }
+
+    override suspend fun deleteMedicineSchedulesByMedicineId(medicineId: Long) {
+        medicineScheduleDao.deleteMedicineSchedulesByMedicineId(medicineId)
+    }
 }

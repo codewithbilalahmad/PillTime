@@ -166,7 +166,7 @@ fun AddMedicationScreen(
                     text = stringResource(R.string.next),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
+                        .padding(top = 16.dp), isLoading = state.isCreatingMedicine,
                     onClick = {
                         viewModel.onAction(AddMedicationAction.OnCreateMedication)
                     }, enabled = state.isNextButtonEnabled,

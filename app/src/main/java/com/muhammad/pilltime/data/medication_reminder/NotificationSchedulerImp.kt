@@ -25,30 +25,25 @@ class NotificationSchedulerImp(
     override fun scheduleMedicine(medicine: Medicine) {
         val timeZone = TimeZone.currentSystemDefault()
         val now = Clock.System.now()
-        var date = medicine.startDate
-
-        while (date <= medicine.endDate) {
-
-            medicine.schedules.forEach { schedule ->
-                val triggerInstant = date
-                    .atTime(schedule.time)
-                    .toInstant(timeZone)
-                val delayMillis = (triggerInstant - now).inWholeMilliseconds
-                if (delayMillis > 0) {
-                    enqueueWorker(
-                       medicine =  medicine,
-                        scheduleId = schedule.id,
-                        delayMillis = delayMillis
-                    )
-                }
+        medicine.schedules.forEach { schedule ->
+            val scheduleDate = schedule.date ?: return@forEach
+            val triggerInstant = scheduleDate
+                .atTime(schedule.time)
+                .toInstant(timeZone)
+            val delayMillis = (triggerInstant - now).inWholeMilliseconds
+            if (delayMillis > 0) {
+                enqueueWorker(
+                    medicine = medicine,
+                    scheduleId = schedule.id,
+                    delayMillis = delayMillis
+                )
             }
-            date += medicine.frequency.toDatePeriod()
         }
     }
 
     private fun enqueueWorker(
         medicine: Medicine,
-        scheduleId : Long,
+        scheduleId: Long,
         delayMillis: Long,
     ) {
         val data = Data.Builder().putLong(MEDICINE_ID, medicine.id).putString(MEDICINE_NAME, medicine.name)
@@ -61,7 +56,7 @@ class NotificationSchedulerImp(
             TimeUnit.MILLISECONDS
         ).setInputData(data).addTag("medicine_${medicine.id}").build()
         WorkManager.getInstance(context).enqueue(
-             request
+            request
         )
     }
 

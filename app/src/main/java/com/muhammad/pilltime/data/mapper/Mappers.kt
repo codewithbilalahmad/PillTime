@@ -43,10 +43,12 @@ fun Medicine.toMedicineEntity(): MedicineEntity {
 
 fun MedicineScheduleEntity.toMedicineSchedule(): MedicineSchedule {
     return MedicineSchedule(
-        id = id, time = LocalTime(
+        id = id,
+        time = LocalTime(
             hour = medicineTime / 60,
             minute = medicineTime % 60
-        ), status = status, medicineId = medicineId
+        ), date = date?.let { Instant.fromEpochMilliseconds(it) }?.toLocalDateTime(timeZone = TimeZone.currentSystemDefault())?.date,
+        status = status, medicineId = medicineId,
     )
 }
 
@@ -55,6 +57,7 @@ fun MedicineSchedule.toMedicineScheduleEntity(): MedicineScheduleEntity {
         id = id,
         status = status,
         medicineTime = time.hour * 60 + time.minute,
-        medicineId = medicineId
+        medicineId = medicineId,
+        date =  date?.atStartOfDayIn(timeZone = TimeZone.currentSystemDefault())?.toEpochMilliseconds()
     )
 }

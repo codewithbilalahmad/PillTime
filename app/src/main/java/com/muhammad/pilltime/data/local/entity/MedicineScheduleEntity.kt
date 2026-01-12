@@ -9,6 +9,7 @@ data class MedicineScheduleEntity(
     @PrimaryKey(autoGenerate = true)
     val id : Long = 0,
     val medicineId : Long,
+    val date : Long?,
     val medicineTime : Int,
     val status: ScheduleStatus,
 )
