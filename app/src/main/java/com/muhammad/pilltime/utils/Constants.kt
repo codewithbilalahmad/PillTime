@@ -5,6 +5,7 @@ object Constants {
     const val REMINDER_CHANNEL_ID = "medication_reminder_channel"
     const val MEDICINE_NAME = "MEDICINE_NAME"
     const val MEDICINE_ID = "MEDICINE_ID"
+    const val NOTIFICATION_ID = "NOTIFICATION_ID"
     const val DOSE = "DOSE"
     const val MEDICINE_TYPE = "MEDICINE_TYPE"
     const val SCHEDULE_ID = "SCHEDULE_ID"

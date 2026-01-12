@@ -15,6 +15,7 @@ import com.muhammad.pilltime.domain.model.MedicineType
 import com.muhammad.pilltime.utils.Constants.DONE_REMINDER_ACTION
 import com.muhammad.pilltime.utils.Constants.MEDICINE_ID
 import com.muhammad.pilltime.utils.Constants.MISSED_REMINDER_ACTION
+import com.muhammad.pilltime.utils.Constants.NOTIFICATION_ID
 import com.muhammad.pilltime.utils.Constants.REMINDER_ACTIVITY_REQUEST_CODE
 import com.muhammad.pilltime.utils.Constants.REMINDER_CHANNEL_DESC
 import com.muhammad.pilltime.utils.Constants.REMINDER_CHANNEL_ID
@@ -41,7 +42,7 @@ object MedicationReminderHelper {
 
     fun createMedicationReminderNotification(
         context: Context,
-        medicineName: String, scheduleId: Long,medicineId : Long,
+        medicineName: String, scheduleId: Long, medicineId: Long,
         dose: Int, medicineType: String,
     ) {
         createMedicationReminderNotificationChannel(context)
@@ -83,19 +84,40 @@ object MedicationReminderHelper {
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, type.icon))
             .setContentText("Time to take $dose Dose of $medicineName $medicineType").setPriority(
                 NotificationCompat.PRIORITY_HIGH
-            ).addAction(R.drawable.ic_done, "Done", reminderDonePendingIntent(scheduleId = scheduleId, medicineId = medicineId))
-            .addAction(R.drawable.ic_missed, "Missed", reminderMissedPendingIntent(scheduleId = scheduleId, medicineId = medicineId))
+            ).addAction(
+                R.drawable.ic_done,
+                "Done",
+                reminderDonePendingIntent(
+                    scheduleId = scheduleId,
+                    medicineId = medicineId,
+                    notificationId = notificationId
+                )
+            )
+            .addAction(
+                R.drawable.ic_missed,
+                "Missed",
+                reminderMissedPendingIntent(
+                    scheduleId = scheduleId,
+                    medicineId = medicineId,
+                    notificationId = notificationId
+                )
+            )
             .setCategory(
                 NotificationCompat.CATEGORY_REMINDER
             ).setAutoCancel(true)
         notificationManager.notify(notificationId, builder.build())
     }
 
-    fun reminderDonePendingIntent(scheduleId: Long, medicineId : Long): PendingIntent {
+    fun reminderDonePendingIntent(
+        scheduleId: Long,
+        medicineId: Long,
+        notificationId: Int,
+    ): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = DONE_REMINDER_ACTION
             putExtra(MEDICINE_ID, medicineId)
             putExtra(SCHEDULE_ID, scheduleId)
+            putExtra(NOTIFICATION_ID, notificationId)
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         return PendingIntent.getActivity(
@@ -106,11 +128,16 @@ object MedicationReminderHelper {
         )
     }
 
-    fun reminderMissedPendingIntent(medicineId : Long,scheduleId: Long): PendingIntent {
+    fun reminderMissedPendingIntent(
+        medicineId: Long,
+        scheduleId: Long,
+        notificationId: Int,
+    ): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = MISSED_REMINDER_ACTION
             putExtra(SCHEDULE_ID, scheduleId)
             putExtra(MEDICINE_ID, medicineId)
+            putExtra(NOTIFICATION_ID, notificationId)
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         return PendingIntent.getActivity(

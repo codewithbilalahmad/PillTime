@@ -5,7 +5,6 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.muhammad.pilltime.domain.model.Medicine
-import com.muhammad.pilltime.domain.model.toDatePeriod
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.utils.Constants.DOSE
 import com.muhammad.pilltime.utils.Constants.MEDICINE_ID
@@ -14,7 +13,6 @@ import com.muhammad.pilltime.utils.Constants.MEDICINE_TYPE
 import com.muhammad.pilltime.utils.Constants.SCHEDULE_ID
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
-import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import java.util.concurrent.TimeUnit
 import kotlin.time.Clock

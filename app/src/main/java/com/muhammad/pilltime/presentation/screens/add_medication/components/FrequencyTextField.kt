@@ -48,7 +48,7 @@ fun FrequencyTextField(
         Box(modifier = Modifier.fillMaxWidth()) {
             AppTextField(
                 value = stringResource(frequency.label),
-                trailingIcon = R.drawable.ic_arrow_down,
+                trailingIcon = if(showFrequencyOptionsDropDown)  R.drawable.ic_arrow_up else  R.drawable.ic_arrow_down,
                 enabled = false,
                 onClick = onToggleFrequencyOptionsDropDown,
                 hint = R.string.medication_frequency,
