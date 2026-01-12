@@ -17,7 +17,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -140,7 +140,7 @@ fun MedicationCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .pointerInput(Unit) {
-                        detectDragGestures(onDragEnd = {
+                        detectHorizontalDragGestures(onDragEnd = {
                             if (offsetX.value >= cardSize.width * 0.35f) {
                                 onDeleteMedicine(medicine.id)
                             } else {
@@ -148,10 +148,10 @@ fun MedicationCard(
                                     offsetX.animateTo(0f)
                                 }
                             }
-                        }, onDrag = { change, dragAmount ->
+                        }, onHorizontalDrag = {change, dragAmount ->
                             change.consume()
                             scope.launch {
-                                val newOffset = (offsetX.value + dragAmount.x).coerceIn(0f, cardSize.width * 0.6f)
+                                val newOffset = (offsetX.value + dragAmount).coerceIn(0f, cardSize.width * 0.6f)
                                 offsetX.snapTo(newOffset)
                             }
                         })
