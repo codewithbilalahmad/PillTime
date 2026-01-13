@@ -11,6 +11,7 @@ import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationViewModel
+import com.muhammad.pilltime.presentation.screens.boarding.BoardingViewModel
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
 import com.muhammad.pilltime.utils.Constants.DATABASE_NAME
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,7 @@ val appModule = module {
     singleOf(::NotificationSchedulerImp).bind<NotificationScheduler>()
     singleOf(::MedicationRepositoryImp).bind<MedicationRepository>()
     singleOf(::MedicationScheduleRespositoryImp).bind<MedicationScheduleRespository>()
+    viewModelOf(::BoardingViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::AddMedicationViewModel)
 }

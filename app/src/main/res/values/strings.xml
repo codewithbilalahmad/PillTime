@@ -65,4 +65,16 @@
     <string name="application">Application</string>
     <string name="pending">Pending</string>
     <string name="missed">Missed</string>
+    <string name="allow_reminder_desp">To make sure you never miss a dose, we need permission to schedule reminders. This ensures that you take your medicines on time and stay healthy every day.</string>
+    <string name="allow_reminders">Allow Reminders</string>
+    <string name="allow_notifications_and_reminders"><![CDATA[Allow Notifications & Reminders]]></string>
+    <string name="allow_notification_and_reminder_desp">To make sure you never miss a dose, we need permission to send notifications. We also need permission to schedule reminders exactly on time, even if your device is idle or dozing.</string>
+    <string name="boarding_medicine_title">Never Miss Your Medicine</string>
+    <string name="boarding_medicine_description">PillTime helps you stay on track by reminding you exactly when it’s time to take your medicine — morning, afternoon, or night.</string>
+    <string name="boarding_alarm_title"><![CDATA[Smart & On-Time Reminders]]></string>
+    <string name="boarding_alarm_description">Get timely notifications and exact alarms, even when your phone is idle or locked, so your medication schedule is never interrupted.</string>
+    <string name="boarding_health_title">Your Health, Your Control</string>
+    <string name="boarding_health_description">Easily manage medicines, dosages, and schedules in one place. Your data stays private, and reminders work only to support your health.</string>
+    <string name="previous">Previous</string>
+    <string name="skip">Skip</string>
 </resources>

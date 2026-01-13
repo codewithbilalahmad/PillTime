@@ -9,9 +9,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,6 +33,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +44,7 @@ import com.muhammad.pilltime.presentation.navigation.Destinations
 import com.muhammad.pilltime.presentation.screens.home.components.HomeHeader
 import com.muhammad.pilltime.presentation.screens.home.components.medicationDataSection
 import com.muhammad.pilltime.utils.ObserveAsEvents
+import com.muhammad.pilltime.utils.openAlarmSettings
 import com.muhammad.pilltime.utils.openAppSettings
 import kotlinx.coroutines.launch
 
@@ -52,8 +56,20 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ObserveAsEvents(viewModel.events, onEvent = {event ->
-        when(event){
+    val isNotificationPermissionPermenentlyDenied =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_DENIED && !ActivityCompat.shouldShowRequestPermissionRationale(
+                activity,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        } else {
+            false
+        }
+    ObserveAsEvents(viewModel.events, onEvent = { event ->
+        when (event) {
             is HomeEvent.ScrollToMedicine -> {
                 val index = state.medications.indexOfFirst { it.id == event.medicineId }
                 if (index != -1) {
@@ -65,28 +81,9 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
         }
     })
     val permissionLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            val isNotificationPermissionPermanentlyDenied =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    !isGranted && !ActivityCompat.shouldShowRequestPermissionRationale(
-                        activity,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    )
-                } else false
-            if (isNotificationPermissionPermanentlyDenied) {
-                viewModel.onAction(HomeAction.OnNotificationPermissionPermanentlyDenied)
-            }
-        }
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val notificationPermissionGranted = ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!notificationPermissionGranted) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
+        viewModel.onAction(HomeAction.OnCheckReminderPermissions)
     }
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         LazyColumn(
@@ -109,11 +106,11 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
                 medications = state.medications,
                 onDateSelected = { date ->
                     viewModel.onAction(HomeAction.OnFilterDataSelected(date))
-                }, onToggleMedicineSchedules = {medicineId ->
+                }, onToggleMedicineSchedules = { medicineId ->
                     viewModel.onAction(HomeAction.OnToggleMedicineSchedules(medicineId))
-                }, onDeleteMedicine = {medicineId ->
+                }, onDeleteMedicine = { medicineId ->
                     viewModel.onAction(HomeAction.OnDeleteMedicineById(medicineId))
-                },
+                }, isMedicinesLoading = state.isMedicinesLoading,
                 selectedDate = state.selectedFilterDate
             )
         }
@@ -134,7 +131,10 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
                     )
                     Text(
                         text = stringResource(R.string.allow_notifications),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
                     )
                 }
             },
@@ -142,9 +142,85 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
             confirmText = stringResource(R.string.allow),
             dismissText = stringResource(R.string.denied), onConfirmClick = {
                 viewModel.onAction(HomeAction.OnToggleAllowNotificationAccessDialog)
-                openAppSettings(context)
+                if (!isNotificationPermissionPermenentlyDenied) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                } else {
+                    openAppSettings(context)
+                }
             }, onDismissClick = {
                 viewModel.onAction(HomeAction.OnToggleAllowNotificationAccessDialog)
+            }
+        )
+    }
+    if (state.showRemindersAccessDialog) {
+        AppAlertDialog(
+            onDismiss = {
+                viewModel.onAction(HomeAction.OnToggleAllowRemindersAccessDialog)
+            },
+            titleContent = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_alarm),
+                        contentDescription = null, modifier = Modifier.size(30.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.allow_reminders),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                }
+            },
+            message = stringResource(R.string.allow_reminder_desp),
+            confirmText = stringResource(R.string.allow),
+            dismissText = stringResource(R.string.denied), onConfirmClick = {
+                viewModel.onAction(HomeAction.OnToggleAllowRemindersAccessDialog)
+                openAlarmSettings(context)
+            }, onDismissClick = {
+                viewModel.onAction(HomeAction.OnToggleAllowRemindersAccessDialog)
+            }
+        )
+    }
+    if (state.showAllowNotificationAndRemindersAccessDialog) {
+        AppAlertDialog(
+            onDismiss = {
+                viewModel.onAction(HomeAction.OnToggleAllowNotificationAndRemindersAccessDialog)
+            },
+            titleContent = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_notification),
+                            contentDescription = null, modifier = Modifier.size(30.dp)
+                        )
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_alarm),
+                            contentDescription = null, modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.allow_notifications_and_reminders),
+                        modifier= Modifier.padding(horizontal = 24.dp),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+                    )
+                }
+            },
+            message = stringResource(R.string.allow_notification_and_reminder_desp),
+            confirmText = stringResource(R.string.allow),
+            dismissText = stringResource(R.string.denied), onConfirmClick = {
+                viewModel.onAction(HomeAction.OnToggleAllowNotificationAndRemindersAccessDialog)
+                openAppSettings(context)
+            }, onDismissClick = {
+                viewModel.onAction(HomeAction.OnToggleAllowNotificationAndRemindersAccessDialog)
             }
         )
     }

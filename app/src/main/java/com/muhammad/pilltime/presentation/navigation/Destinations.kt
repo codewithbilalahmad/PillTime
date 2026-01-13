@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 sealed interface Destinations{
     @Serializable
+    data object BoardingScreen : Destinations
+    @Serializable
     data object HomeScreen : Destinations
     @Serializable
     data object AddMedicationScreen : Destinations

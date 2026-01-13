@@ -6,8 +6,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.muhammad.pilltime.MainActivity
 import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.R
@@ -26,6 +28,12 @@ object MedicationReminderHelper {
     private val context = PillTimeApplication.INSTANCE
     fun createMedicationReminderNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val soundUri =
+                "android:resources://${context.packageName}/${R.raw.notification}".toUri()
+            val audioAttributes =
+                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(
+                    AudioAttributes.CONTENT_TYPE_SONIFICATION
+                ).build()
             val channel = NotificationChannel(
                 REMINDER_CHANNEL_ID,
                 REMINDER_CHANNEL_NAME,
@@ -33,6 +41,7 @@ object MedicationReminderHelper {
             ).apply {
                 description = REMINDER_CHANNEL_DESC
                 enableVibration(true)
+                setSound(soundUri, audioAttributes)
             }
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -60,16 +69,10 @@ object MedicationReminderHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val dosageUnit = when (type) {
-            MedicineType.TABLET,
-            MedicineType.CAPSULE,
-                -> "tablet"
-
+            MedicineType.TABLET, MedicineType.CAPSULE -> "tablet"
             MedicineType.SYRUP -> "spoon"
-
             MedicineType.DROPS -> "drops"
-
             MedicineType.Spray -> "spray"
-
             MedicineType.GEL -> "application"
         }
         val builder = NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
@@ -78,7 +81,9 @@ object MedicationReminderHelper {
             .setContentIntent(activityPendingIntent)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    "Time to take $dose $dosageUnit of $medicineName $medicineType"
+                    "Time to take $dose $dosageUnit of $medicineName ${
+                        medicineType.lowercase().replaceFirstChar { it.uppercase() }
+                    }"
                 )
             )
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, type.icon))

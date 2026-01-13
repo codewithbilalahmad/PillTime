@@ -1,11 +1,17 @@
 package com.muhammad.pilltime.presentation.screens.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
+import com.muhammad.pilltime.utils.canScheduleExactAlarms
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,9 +35,7 @@ class HomeViewModel(
             state.selectedFilterDate in medicine.startDate..medicine.endDate && medicine.schedules.any { it.date == state.selectedFilterDate }
         }.map { medicine ->
             val scheduleForDate = medicine.schedules.filter { it.date == state.selectedFilterDate }
-            val doneCount = scheduleForDate.count {
-                it.status == ScheduleStatus.DONE
-            }
+            val doneCount = scheduleForDate.count { it.status == ScheduleStatus.DONE }
             val totalCount = scheduleForDate.size
             medicine.copy(
                 schedules = scheduleForDate,
@@ -39,14 +43,13 @@ class HomeViewModel(
                 selectedDateProgress = if (totalCount == 0) 0f else doneCount.toFloat() / totalCount
             )
         }
-        state.copy(medications = filtered)
+        state.copy(medications = filtered, isMedicinesLoading = false)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeState())
     private val _events = Channel<HomeEvent>()
     val events = _events.receiveAsFlow()
     fun onAction(action: HomeAction) {
         when (action) {
             is HomeAction.OnFilterDataSelected -> onFilterDataSelected(action.date)
-            HomeAction.OnNotificationPermissionPermanentlyDenied -> onNotificationPermissionPermanentlyDenied()
             HomeAction.OnToggleAllowNotificationAccessDialog -> onToggleAllowNotificationAccessDialog()
             is HomeAction.OnUpdateMedicineScheduleStatus -> onUpdateMedicineScheduleStatus(
                 scheduleId = action.scheduleId,
@@ -54,9 +57,44 @@ class HomeViewModel(
                 status = action.status
             )
 
-            is HomeAction.OnToggleMedicineSchedules -> onToggleMedicineSchedules(action.medicineId)
+            is HomeAction.OnToggleMedicineSchedules -> onToggleMedicineSchedules(medicineId = action.medicineId)
             is HomeAction.OnDeleteMedicineById -> onDeleteMedicineById(action.medicineId)
+            HomeAction.OnToggleAllowNotificationAndRemindersAccessDialog -> onToggleAllowNotificationAndRemindersAccessDialog()
+            HomeAction.OnToggleAllowRemindersAccessDialog -> onToggleAllowRemindersAccessDialog()
+            HomeAction.OnCheckReminderPermissions -> onCheckReminderPermissions()
         }
+    }
+
+    private fun onCheckReminderPermissions() {
+        viewModelScope.launch {
+            val context = PillTimeApplication.INSTANCE
+            val notificationGranted =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else true
+            val alarmPermissionGranted = canScheduleExactAlarms(context)
+            when{
+                !notificationGranted && !alarmPermissionGranted -> {
+                    onToggleAllowNotificationAndRemindersAccessDialog()
+                }
+                !notificationGranted ->{
+                    onToggleAllowNotificationAccessDialog()
+                }
+                !alarmPermissionGranted ->{
+                    onToggleAllowRemindersAccessDialog()
+                }
+            }
+        }
+    }
+
+    private fun onToggleAllowRemindersAccessDialog() {
+        _state.update { it.copy(showRemindersAccessDialog = !it.showRemindersAccessDialog) }
+    }
+
+    private fun onToggleAllowNotificationAndRemindersAccessDialog() {
+        _state.update { it.copy(showAllowNotificationAndRemindersAccessDialog = !it.showAllowNotificationAndRemindersAccessDialog) }
     }
 
     private fun onDeleteMedicineById(medicineId: Long) {
@@ -94,14 +132,6 @@ class HomeViewModel(
         onAction(HomeAction.OnToggleMedicineSchedules(medicineId = medicineId))
     }
 
-    private fun onNotificationPermissionPermanentlyDenied() {
-        _state.update {
-            it.copy(
-                isNotificationPermanentlyDenied = true,
-                showAllowNotificationAccessDialog = true
-            )
-        }
-    }
 
     private fun onToggleAllowNotificationAccessDialog() {
         _state.update { it.copy(showAllowNotificationAccessDialog = !it.showAllowNotificationAccessDialog) }

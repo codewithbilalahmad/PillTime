@@ -8,13 +8,14 @@ import androidx.navigation.toRoute
 import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationScreen
 import com.muhammad.pilltime.presentation.screens.add_medication_success.AddMedicationSuccessScreen
+import com.muhammad.pilltime.presentation.screens.boarding.BoardingScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
 import kotlin.reflect.typeOf
 
 @Composable
 fun AppNavigation(navHostController: NavHostController, homeViewModel: HomeViewModel) {
-    NavHost(navController = navHostController, startDestination = Destinations.HomeScreen) {
+    NavHost(navController = navHostController, startDestination = Destinations.BoardingScreen) {
         composable<Destinations.HomeScreen>{
             HomeScreen(navHostController = navHostController, viewModel = homeViewModel)
         }
@@ -27,6 +28,10 @@ fun AppNavigation(navHostController: NavHostController, homeViewModel: HomeViewM
             val medicine = it.toRoute<Destinations.AddMedicationSuccessScreen>().medicine
             AddMedicationSuccessScreen(navHostController = navHostController, medicine = medicine)
         }
-        composable<Destinations.MedicationHistoryScreen>{  }
+        composable<Destinations.BoardingScreen>{
+            BoardingScreen(navHostController = navHostController)
+        }
+        composable<Destinations.MedicationHistoryScreen>{
+        }
     }
 }

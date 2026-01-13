@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -14,8 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -23,17 +26,17 @@ import androidx.compose.ui.unit.dp
 fun PrimaryButton(
     modifier: Modifier = Modifier,
     text: String,isLoading : Boolean = false,
-    onClick: () -> Unit,
+    onClick: () -> Unit,shape: Shape = RoundedCornerShape(16.dp),
     enabled: Boolean = true, contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val containerColor by animateColorAsState(
-        targetValue = if (enabled && !isLoading) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+        targetValue = if (enabled && !isLoading) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
         label = "containerColor", animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
     )
     val contentColor by animateColorAsState(
-        targetValue = if (enabled && !isLoading) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.outline,
+        targetValue = if (enabled && !isLoading) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.outline,
         label = "contentColor", animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
     )
     Button(
@@ -44,7 +47,7 @@ fun PrimaryButton(
             containerColor = containerColor,
             disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = contentColor
-        ), modifier = modifier, shapes = ButtonDefaults.shapes(), contentPadding = contentPadding
+        ), modifier = modifier, shape = shape, contentPadding = contentPadding
     ) {
         if(isLoading){
             CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
@@ -55,7 +58,7 @@ fun PrimaryButton(
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
             )
         }
     }

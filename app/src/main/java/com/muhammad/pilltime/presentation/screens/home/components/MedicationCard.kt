@@ -104,12 +104,14 @@ fun MedicationCard(
         Box(modifier = Modifier.fillMaxWidth()) {
             val scale by infiniteTransition.animateFloat(
                 initialValue = 0.8f, targetValue = 1.2f, animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse
+                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
                 ), label = "scale"
             )
             val rotation by infiniteTransition.animateFloat(
                 initialValue = 0f, targetValue = 32f, animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing), repeatMode = RepeatMode.Reverse
+                    animation = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
                 ), label = "rotation"
             )
             Box(
@@ -119,12 +121,12 @@ fun MedicationCard(
                         height = with(density) { cardSize.height.toDp() })
                     .clip(RoundedCornerShape(16.dp))
                     .background(
-                        MaterialTheme.colorScheme.error
+                        medicine.medicineType.color
                     )
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_delete),
-                    contentDescription = null,tint = MaterialTheme.colorScheme.onError,
+                    contentDescription = null, tint = MaterialTheme.colorScheme.onError,
                     modifier = Modifier
                         .padding(12.dp)
                         .align(Alignment.CenterStart)
@@ -141,23 +143,23 @@ fun MedicationCard(
                     .fillMaxWidth()
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures(onDragEnd = {
-                            if (offsetX.value >= cardSize.width * 0.35f) {
+                            if (offsetX.value >= cardSize.width * 0.40f) {
                                 onDeleteMedicine(medicine.id)
                             } else {
                                 scope.launch {
                                     offsetX.animateTo(0f)
                                 }
                             }
-                        }, onHorizontalDrag = {change, dragAmount ->
+                        }, onHorizontalDrag = { change, dragAmount ->
                             change.consume()
                             scope.launch {
-                                val newOffset = (offsetX.value + dragAmount).coerceIn(0f, cardSize.width * 0.6f)
+                                val newOffset =     (offsetX.value + dragAmount).coerceIn(0f, cardSize.width * 0.7f)
                                 offsetX.snapTo(newOffset)
                             }
                         })
                     }
-                    .graphicsLayer{
-                        translationX = offsetX.value
+                    .graphicsLayer {
+                        translationX = 6.dp.toPx() + offsetX.value
                     }
                     .onSizeChanged { size ->
                         cardSize = with(density) {
@@ -279,6 +281,22 @@ fun MedicationCard(
                                         .background(progressColor)
                                 )
                             }
+                            val percentageColor by animateColorAsState(
+                                targetValue = when (medicine.selectedDateProgress) {
+                                    in 0f..0.3f -> MaterialTheme.colorScheme.error
+                                    in 0.3f..0.6f -> MaterialTheme.colorScheme.primary
+                                    else -> Green
+                                },
+                                animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
+                                label = "progressColor"
+                            )
+                            Text(
+                                text = "${(medicine.selectedDateProgress * 100).toInt()}%",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = percentageColor
+                                )
+                            )
                         }
                     }
                     Spacer(Modifier.height(6.dp))
