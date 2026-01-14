@@ -7,12 +7,15 @@ import com.muhammad.pilltime.data.local.PillTimeDatabase
 import com.muhammad.pilltime.data.medication_reminder.NotificationSchedulerImp
 import com.muhammad.pilltime.data.repository.MedicationRepositoryImp
 import com.muhammad.pilltime.data.repository.MedicationScheduleRespositoryImp
+import com.muhammad.pilltime.data.settings.SettingPreferencesImp
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
+import com.muhammad.pilltime.domain.repository.SettingPreferences
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationViewModel
 import com.muhammad.pilltime.presentation.screens.boarding.BoardingViewModel
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
+import com.muhammad.pilltime.presentation.screens.user_name.UsernameViewModel
 import com.muhammad.pilltime.utils.Constants.DATABASE_NAME
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.singleOf
@@ -32,10 +35,12 @@ val appModule = module {
     single {
         get<PillTimeDatabase>().medicineScheduleDao
     }
+    singleOf(::SettingPreferencesImp).bind<SettingPreferences>()
     singleOf(::NotificationSchedulerImp).bind<NotificationScheduler>()
     singleOf(::MedicationRepositoryImp).bind<MedicationRepository>()
     singleOf(::MedicationScheduleRespositoryImp).bind<MedicationScheduleRespository>()
     viewModelOf(::BoardingViewModel)
+    viewModelOf(::UsernameViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::AddMedicationViewModel)
 }

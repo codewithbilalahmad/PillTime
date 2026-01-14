@@ -10,6 +10,7 @@ import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
 import com.muhammad.pilltime.utils.buildDatedSchedules
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,8 +62,8 @@ class AddMedicationViewModel(
     }
 
     private fun onCreateMedication() {
-        viewModelScope.launch {
-            _state.update { it.copy(isCreatingMedicine = true) }
+        _state.update { it.copy(isCreatingMedicine = true) }
+        viewModelScope.launch(Dispatchers.IO) {
             val startDate = state.value.startDate ?: return@launch
             val endDate = state.value.endDate ?: return@launch
             val medicineId = state.value.currentMedicineId
@@ -86,7 +87,7 @@ class AddMedicationViewModel(
             )
             medicationRepository.insertMedicine(medication)
             medicationScheduleRepository.insertMedicineSchedules(datedSchedules)
-            notificationScheduler.scheduleMedicine(medication)
+            notificationScheduler.scheduleNextReminder()
             _state.update { it.copy(isCreatingMedicine = false) }
             _events.trySend(AddMedicationEvent.OnCreateMedicationSuccess(medication))
         }

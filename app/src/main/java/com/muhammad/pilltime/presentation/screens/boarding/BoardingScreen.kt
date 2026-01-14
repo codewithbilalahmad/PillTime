@@ -48,6 +48,7 @@ import com.muhammad.pilltime.presentation.components.PagerDotIndicator
 import com.muhammad.pilltime.presentation.components.PrimaryButton
 import com.muhammad.pilltime.presentation.components.SecondaryButton
 import com.muhammad.pilltime.presentation.navigation.Destinations
+import com.muhammad.pilltime.utils.ObserveAsEvents
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -98,7 +99,7 @@ fun BoardingScreen(
                                 pagerState.animateScrollToPage(currentPage + 1)
                             }
                         } else {
-                            navHostController.navigate(Destinations.HomeScreen)
+                            navHostController.navigate(Destinations.UsernameScreen)
                         }
                     },
                     contentPadding = PaddingValues(vertical = 16.dp),
@@ -168,7 +169,7 @@ fun BoardingScreen(
                 ) {
                     PrimaryButton(
                         onClick = {
-                            navHostController.navigate(Destinations.HomeScreen)
+                            navHostController.navigate(Destinations.UsernameScreen)
                         },
                         contentPadding = PaddingValues(vertical = 12.dp, horizontal = 24.dp),
                         text = stringResource(R.string.skip)

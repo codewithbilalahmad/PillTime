@@ -9,7 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.presentation.navigation.AppNavigation
@@ -24,19 +26,26 @@ import com.muhammad.pilltime.utils.Constants.SCHEDULE_ID
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-    val homeViewModel : HomeViewModel by viewModel()
+    val homeViewModel: HomeViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition {
+            homeViewModel.state.value.isCheckingBoarding
+        }
         handleReminderAction(intent)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT,Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         )
         setContent {
             PillTimeTheme {
+                val state by homeViewModel.state.collectAsStateWithLifecycle()
                 val navHostController = rememberNavController()
-                AppNavigation(navHostController = navHostController, homeViewModel = homeViewModel)
+                AppNavigation(
+                    navHostController = navHostController,
+                    homeViewModel = homeViewModel,
+                    showBoarding = state.showBoarding
+                )
             }
         }
     }
@@ -45,19 +54,35 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         handleReminderAction(intent)
     }
-    private fun handleReminderAction(intent : Intent){
-        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val scheduleId = intent.getLongExtra(SCHEDULE_ID,-1L)
-        val medicineId = intent.getLongExtra(MEDICINE_ID,-1L)
-        val notificationId = intent.getIntExtra(NOTIFICATION_ID,0)
-        if(scheduleId == -1L) return
+
+    private fun handleReminderAction(intent: Intent) {
+        val notificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val scheduleId = intent.getLongExtra(SCHEDULE_ID, -1L)
+        val medicineId = intent.getLongExtra(MEDICINE_ID, -1L)
+        val notificationId = intent.getIntExtra(NOTIFICATION_ID, 0)
+        if (scheduleId == -1L) return
+
         notificationManager.cancel(notificationId)
-        when(intent.action){
+        when (intent.action) {
             DONE_REMINDER_ACTION -> {
-                homeViewModel.onAction(HomeAction.OnUpdateMedicineScheduleStatus(scheduleId = scheduleId, medicineId = medicineId, status = ScheduleStatus.DONE))
+                homeViewModel.onAction(
+                    HomeAction.OnUpdateMedicineScheduleStatus(
+                        scheduleId = scheduleId,
+                        medicineId = medicineId,
+                        status = ScheduleStatus.DONE
+                    )
+                )
             }
-            MISSED_REMINDER_ACTION ->{
-                homeViewModel.onAction(HomeAction.OnUpdateMedicineScheduleStatus(scheduleId = scheduleId,medicineId = medicineId, status = ScheduleStatus.MISSED))
+
+            MISSED_REMINDER_ACTION -> {
+                homeViewModel.onAction(
+                    HomeAction.OnUpdateMedicineScheduleStatus(
+                        scheduleId = scheduleId,
+                        medicineId = medicineId,
+                        status = ScheduleStatus.MISSED
+                    )
+                )
             }
         }
     }

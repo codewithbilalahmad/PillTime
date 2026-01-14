@@ -1,6 +1,7 @@
 package com.muhammad.pilltime.presentation.screens.add_medication
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -36,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.muhammad.pilltime.R
 import com.muhammad.pilltime.presentation.components.AppTextField
+import com.muhammad.pilltime.presentation.components.DashedHorizontalDivider
 import com.muhammad.pilltime.presentation.components.PrimaryButton
 import com.muhammad.pilltime.presentation.navigation.Destinations
 import com.muhammad.pilltime.presentation.screens.add_medication.components.FrequencyTextField
@@ -68,22 +70,26 @@ fun AddMedicationScreen(
         }
     })
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-                Text(stringResource(R.string.new_medication))
-            },
-            navigationIcon = {
-                IconButton(onClick = {
-                    navHostController.navigateUp()
-                }, shapes = IconButtonDefaults.shapes()) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                        contentDescription = null
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-        )
+        Column(modifier = Modifier.fillMaxWidth()){
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(stringResource(R.string.new_medication))
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navHostController.navigateUp()
+                    }, shapes = IconButtonDefaults.shapes()) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                            contentDescription = null
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+            )
+
+            DashedHorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
     }) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

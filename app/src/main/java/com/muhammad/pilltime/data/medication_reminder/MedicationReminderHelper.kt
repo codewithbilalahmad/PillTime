@@ -13,6 +13,8 @@ import androidx.core.net.toUri
 import com.muhammad.pilltime.MainActivity
 import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.R
+import com.muhammad.pilltime.domain.model.Medicine
+import com.muhammad.pilltime.domain.model.MedicineSchedule
 import com.muhammad.pilltime.domain.model.MedicineType
 import com.muhammad.pilltime.utils.Constants.DONE_REMINDER_ACTION
 import com.muhammad.pilltime.utils.Constants.MEDICINE_ID
@@ -51,8 +53,8 @@ object MedicationReminderHelper {
 
     fun createMedicationReminderNotification(
         context: Context,
-        medicineName: String, scheduleId: Long, medicineId: Long,
-        dose: Int, medicineType: String,
+        medicine : Medicine,
+        schedule : MedicineSchedule
     ) {
         createMedicationReminderNotificationChannel(context)
         val notificationId = System.currentTimeMillis().toInt()
@@ -61,7 +63,7 @@ object MedicationReminderHelper {
         val activityIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val type = MedicineType.valueOf(medicineType.uppercase())
+        val type = medicine.medicineType
         val activityPendingIntent = PendingIntent.getActivity(
             context,
             REMINDER_ACTIVITY_REQUEST_CODE,
@@ -77,24 +79,24 @@ object MedicationReminderHelper {
         }
         val builder = NotificationCompat.Builder(context, REMINDER_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_logo)
-            .setContentTitle("$medicineName Reminder")
+            .setContentTitle("${medicine.name} Reminder")
             .setContentIntent(activityPendingIntent)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    "Time to take $dose $dosageUnit of $medicineName ${
-                        medicineType.lowercase().replaceFirstChar { it.uppercase() }
+                    "Time to take ${medicine.dosage} $dosageUnit of ${medicine.name} ${
+                        type.name.lowercase().replaceFirstChar { it.uppercase() }
                     }"
                 )
             )
             .setLargeIcon(BitmapFactory.decodeResource(context.resources, type.icon))
-            .setContentText("Time to take $dose Dose of $medicineName $medicineType").setPriority(
+            .setContentText("Time to take ${medicine.dosage} Dose of ${medicine.name} ${medicine.medicineType}").setPriority(
                 NotificationCompat.PRIORITY_HIGH
             ).addAction(
                 R.drawable.ic_done,
                 "Done",
                 reminderDonePendingIntent(
-                    scheduleId = scheduleId,
-                    medicineId = medicineId,
+                    scheduleId = schedule.id,
+                    medicineId = medicine.id,
                     notificationId = notificationId
                 )
             )
@@ -102,8 +104,8 @@ object MedicationReminderHelper {
                 R.drawable.ic_missed,
                 "Missed",
                 reminderMissedPendingIntent(
-                    scheduleId = scheduleId,
-                    medicineId = medicineId,
+                    scheduleId = schedule.id,
+                    medicineId = medicine.id,
                     notificationId = notificationId
                 )
             )

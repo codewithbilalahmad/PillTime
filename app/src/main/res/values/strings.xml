@@ -28,7 +28,7 @@
     <string name="sunday">Sun</string>
     <string name="new_medication">New Medication</string>
     <string name="medication_name">Medication Name</string>
-    <string name="hey_bilal">Hey Bilal</string>
+    <string name="hey">Hey</string>
     <string name="greeting">How do you feel today?</string>
     <string name="create_new_medication">Create\nNew Medication</string>
     <string name="start">Start</string>
@@ -77,4 +77,6 @@
     <string name="boarding_health_description">Easily manage medicines, dosages, and schedules in one place. Your data stays private, and reminders work only to support your health.</string>
     <string name="previous">Previous</string>
     <string name="skip">Skip</string>
+    <string name="username">Username</string>
+    <string name="what_is_your_name">What is your name?</string>
 </resources>

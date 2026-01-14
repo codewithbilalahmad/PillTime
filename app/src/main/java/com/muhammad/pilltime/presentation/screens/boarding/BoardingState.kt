@@ -19,6 +19,6 @@ data class BoardingState(
             image = R.drawable.boarding_shield,
             title = R.string.boarding_health_title,
             description = R.string.boarding_health_description
-        ),
+        )
     )
 )

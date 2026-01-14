@@ -46,6 +46,7 @@ import com.muhammad.pilltime.presentation.screens.home.components.medicationData
 import com.muhammad.pilltime.utils.ObserveAsEvents
 import com.muhammad.pilltime.utils.openAlarmSettings
 import com.muhammad.pilltime.utils.openAppSettings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -83,6 +84,7 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(Unit) {
+        delay(3000L)
         viewModel.onAction(HomeAction.OnCheckReminderPermissions)
     }
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
@@ -97,7 +99,7 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
                 HomeHeader(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateItem(), onAddMedicationScreen = {
+                        .animateItem(), username = state.username, onAddMedicationScreen = {
                         navHostController.navigate(Destinations.AddMedicationScreen)
                     }
                 )

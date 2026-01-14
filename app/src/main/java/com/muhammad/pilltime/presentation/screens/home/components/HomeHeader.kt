@@ -41,7 +41,7 @@ import com.muhammad.pilltime.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeHeader(modifier: Modifier = Modifier, onAddMedicationScreen: () -> Unit) {
+fun HomeHeader(modifier: Modifier = Modifier, onAddMedicationScreen: () -> Unit, username : String) {
     val context = LocalContext.current
     val isNotificationPermissionGranted = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -86,7 +86,7 @@ fun HomeHeader(modifier: Modifier = Modifier, onAddMedicationScreen: () -> Unit)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        text = stringResource(R.string.hey_bilal),
+                        text = "${stringResource(R.string.hey)} $username",
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Light,
                             color = MaterialTheme.colorScheme.onError

@@ -10,7 +10,7 @@ import com.muhammad.pilltime.PillTimeApplication
 import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
-import com.muhammad.pilltime.domain.repository.NotificationScheduler
+import com.muhammad.pilltime.domain.repository.SettingPreferences
 import com.muhammad.pilltime.utils.canScheduleExactAlarms
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,14 +24,24 @@ import kotlinx.datetime.LocalDate
 
 class HomeViewModel(
     private val medicationRepository: MedicationRepository,
-    private val notificationScheduler: NotificationScheduler,
+    private val settingPreferences: SettingPreferences,
     private val medicationScheduleRepository: MedicationScheduleRespository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = combine(
-        _state, medicationRepository.getAllMedicines()
-    ) { state, medications ->
-        val filtered = medications.filter {medicine ->
+        _state,
+        medicationRepository.getAllMedicines(),
+        settingPreferences.observeShowBoarding(),
+        settingPreferences.observeUsername()
+    ) { state, medications, showBoarding, username ->
+        _state.update {
+            it.copy(
+                showBoarding = showBoarding,
+                username = username,
+                isCheckingBoarding = false
+            )
+        }
+        val filtered = medications.filter { medicine ->
             state.selectedFilterDate in medicine.startDate..medicine.endDate && medicine.schedules.any { it.date == state.selectedFilterDate }
         }.map { medicine ->
             val scheduleForDate = medicine.schedules.filter { it.date == state.selectedFilterDate }
@@ -68,21 +78,23 @@ class HomeViewModel(
     private fun onCheckReminderPermissions() {
         viewModelScope.launch {
             val context = PillTimeApplication.INSTANCE
-            val notificationGranted =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 ContextCompat.checkSelfPermission(
                     context,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
             } else true
             val alarmPermissionGranted = canScheduleExactAlarms(context)
-            when{
+            when {
                 !notificationGranted && !alarmPermissionGranted -> {
                     onToggleAllowNotificationAndRemindersAccessDialog()
                 }
-                !notificationGranted ->{
+
+                !notificationGranted -> {
                     onToggleAllowNotificationAccessDialog()
                 }
-                !alarmPermissionGranted ->{
+
+                !alarmPermissionGranted -> {
                     onToggleAllowRemindersAccessDialog()
                 }
             }
@@ -101,7 +113,6 @@ class HomeViewModel(
         viewModelScope.launch {
             medicationRepository.deleteMedicineById(medicineId)
             medicationScheduleRepository.deleteMedicineSchedulesByMedicineId(medicineId)
-            notificationScheduler.cancelMedicine(medicineId)
         }
     }
 

@@ -26,14 +26,27 @@ class MedicationScheduleRespositoryImp(
         }
     }
 
+    override fun getAllSchedules(): Flow<List<MedicineSchedule>> {
+        return medicineScheduleDao.getAllSchedules().map { entities ->
+            entities.map { entity -> entity.toMedicineSchedule() }
+        }
+    }
+
     override suspend fun updateMedicineScheduleStatus(
         status: ScheduleStatus,
         scheduleId: Long,
     ) {
-        medicineScheduleDao.updateMedicineScheduleStatus(status = status, scheduleId = scheduleId)
+        medicineScheduleDao.updateMedicineScheduleStatus(
+            status = status,
+            scheduleId = scheduleId
+        )
     }
 
     override suspend fun deleteMedicineSchedulesByMedicineId(medicineId: Long) {
         medicineScheduleDao.deleteMedicineSchedulesByMedicineId(medicineId)
+    }
+
+    override fun getScheduleById(scheduleId: Long): Flow<MedicineSchedule?> {
+        return medicineScheduleDao.getScheduleById(scheduleId).map { it?.toMedicineSchedule() }
     }
 }

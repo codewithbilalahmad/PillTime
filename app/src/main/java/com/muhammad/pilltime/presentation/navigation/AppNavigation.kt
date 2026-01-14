@@ -11,27 +11,38 @@ import com.muhammad.pilltime.presentation.screens.add_medication_success.AddMedi
 import com.muhammad.pilltime.presentation.screens.boarding.BoardingScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
+import com.muhammad.pilltime.presentation.screens.user_name.UsernameScreen
 import kotlin.reflect.typeOf
 
 @Composable
-fun AppNavigation(navHostController: NavHostController, homeViewModel: HomeViewModel) {
-    NavHost(navController = navHostController, startDestination = Destinations.BoardingScreen) {
-        composable<Destinations.HomeScreen>{
+fun AppNavigation(
+    navHostController: NavHostController,
+    homeViewModel: HomeViewModel,
+    showBoarding: Boolean,
+) {
+    val startDestination = if(showBoarding) Destinations.BoardingScreen else Destinations.HomeScreen
+    NavHost(navController = navHostController, startDestination = startDestination) {
+        composable<Destinations.HomeScreen> {
             HomeScreen(navHostController = navHostController, viewModel = homeViewModel)
         }
-        composable<Destinations.AddMedicationScreen>{
+        composable<Destinations.AddMedicationScreen> {
             AddMedicationScreen(navHostController = navHostController)
         }
-        composable<Destinations.AddMedicationSuccessScreen>(typeMap = mapOf(
-            typeOf<Medicine>() to CustomNavType.Medicine
-        )){
+        composable<Destinations.AddMedicationSuccessScreen>(
+            typeMap = mapOf(
+                typeOf<Medicine>() to CustomNavType.Medicine
+            )
+        ) {
             val medicine = it.toRoute<Destinations.AddMedicationSuccessScreen>().medicine
             AddMedicationSuccessScreen(navHostController = navHostController, medicine = medicine)
         }
-        composable<Destinations.BoardingScreen>{
+        composable<Destinations.BoardingScreen> {
             BoardingScreen(navHostController = navHostController)
         }
-        composable<Destinations.MedicationHistoryScreen>{
+        composable<Destinations.UsernameScreen>{
+            UsernameScreen(navHostController = navHostController)
+        }
+        composable<Destinations.MedicationHistoryScreen> {
         }
     }
 }

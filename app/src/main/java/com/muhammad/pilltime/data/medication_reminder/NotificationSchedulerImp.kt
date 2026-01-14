@@ -5,13 +5,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
 import com.muhammad.pilltime.domain.repository.NotificationScheduler
-import com.muhammad.pilltime.utils.Constants.DOSE
 import com.muhammad.pilltime.utils.Constants.MEDICINE_ID
-import com.muhammad.pilltime.utils.Constants.MEDICINE_NAME
-import com.muhammad.pilltime.utils.Constants.MEDICINE_TYPE
+import com.muhammad.pilltime.utils.Constants.REMINDER_ALARM_REQUEST_CODE
 import com.muhammad.pilltime.utils.Constants.SCHEDULE_ID
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
@@ -24,60 +21,45 @@ class NotificationSchedulerImp(
     private val medicationScheduleRepository: MedicationScheduleRespository,
 ) : NotificationScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    override fun scheduleMedicine(medicine: Medicine) {
+    override suspend fun scheduleNextReminder() {
+        cancelAll()
+        val schedules = medicationScheduleRepository.getAllSchedules().first()
         val timeZone = TimeZone.currentSystemDefault()
         val now = Clock.System.now()
-        medicine.schedules.forEach { schedule ->
-            val scheduleDate = schedule.date ?: return@forEach
-            val triggerInstant = scheduleDate
-                .atTime(schedule.time)
-                .toInstant(timeZone)
-            val triggerMillis = triggerInstant.toEpochMilliseconds()
-            if (triggerMillis <= now.toEpochMilliseconds()) return@forEach
-            val intent = Intent(context, MedicineReminderReceiver::class.java).apply {
-                putExtra(MEDICINE_ID, medicine.id)
-                putExtra(MEDICINE_NAME, medicine.name)
-                putExtra(DOSE, medicine.dosage)
-                putExtra(MEDICINE_TYPE, medicine.medicineType.name)
-                putExtra(SCHEDULE_ID, schedule.id)
+        val nextSchedule = schedules.mapNotNull {schedule ->
+            schedule.date?.let { date ->
+                schedule to date.atTime(schedule.time).toInstant(timeZone)
             }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                schedule.id.toInt(),
-                intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (!alarmManager.canScheduleExactAlarms()) {
-                        return@forEach
-                    }
-                }
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerMillis,
-                    pendingIntent
-                )
-            } catch (e: SecurityException) {
-                e.printStackTrace()
-            }
+        }.filter { it.second > now }.minByOrNull { it.second } ?: return
+        val schedule = nextSchedule.first
+        val triggerMillis = nextSchedule.second.toEpochMilliseconds()
+        val intent = Intent(context, MedicineReminderReceiver::class.java).apply {
+            putExtra(MEDICINE_ID, schedule.medicineId)
+            putExtra(SCHEDULE_ID, schedule.id)
         }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            REMINDER_ALARM_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) return
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerMillis,
+            pendingIntent
+        )
     }
 
-    override suspend fun cancelMedicine(medicineId: Long) {
-        val schedules = medicationScheduleRepository.getMedicineSchedules(medicineId).first()
-        schedules.forEach{schedule ->
-            val intent = Intent(context, MedicineReminderReceiver::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                requestCode(schedule.id),
-                intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            alarmManager.cancel(pendingIntent)
-            pendingIntent.cancel()
-        }
-    }
-
-    private fun requestCode(scheduleId: Long): Int {
-        return scheduleId.hashCode()
+    override suspend fun cancelAll() {
+        val intent = Intent(context, MedicineReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            REMINDER_ALARM_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 }

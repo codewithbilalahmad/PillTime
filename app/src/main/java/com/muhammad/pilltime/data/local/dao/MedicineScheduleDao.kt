@@ -15,6 +15,13 @@ interface MedicineScheduleDao {
     @Query("SELECT * FROM MedicineScheduleEntity WHERE medicineId=:medicineId")
     fun getMedicineSchedules(medicineId: Long): Flow<List<MedicineScheduleEntity>>
 
+    @Query("SELECT * FROM MedicineScheduleEntity WHERE id=:scheduleId")
+    fun getScheduleById(scheduleId: Long): Flow<MedicineScheduleEntity?>
+
+    @Query("SELECT * FROM MedicineScheduleEntity")
+    fun getAllSchedules(): Flow<List<MedicineScheduleEntity>>
+
+
     @Query(
         "UPDATE MedicineScheduleEntity SET status =:status WHERE id =:scheduleId"
     )

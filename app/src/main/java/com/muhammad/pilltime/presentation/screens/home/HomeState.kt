@@ -10,6 +10,9 @@ data class HomeState(
     val medications: List<Medicine> = emptyList(),
     val expandedMedicineIds : Set<Long> = emptySet(),
     val isMedicinesLoading : Boolean = true,
+    val showBoarding: Boolean = false,
+    val username : String = "",
+    val isCheckingBoarding : Boolean = true,
     val selectedFilterDate: LocalDate = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault()).date,
     val showRemindersAccessDialog : Boolean = false,
