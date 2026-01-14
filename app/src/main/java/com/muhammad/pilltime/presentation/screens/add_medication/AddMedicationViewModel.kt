@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -62,34 +63,43 @@ class AddMedicationViewModel(
     }
 
     private fun onCreateMedication() {
+        var medication: Medicine? = null
         _state.update { it.copy(isCreatingMedicine = true) }
-        viewModelScope.launch(Dispatchers.IO) {
-            val startDate = state.value.startDate ?: return@launch
-            val endDate = state.value.endDate ?: return@launch
-            val medicineId = state.value.currentMedicineId
-            val datedSchedules = buildDatedSchedules(
-                medicineId = medicineId,
-                startDate = startDate,
-                endDate = endDate,
-                frequency = state.value.selectedMedicineFrequency,
-                baseSchedules = state.value.medicineSchedules
-            )
-            val medication = Medicine(
-                id = state.value.currentMedicineId,
-                name = state.value.medicationName,
-                dosage = state.value.dose.toIntOrNull() ?: 1,
-                frequency = state.value.selectedMedicineFrequency,
-                startDate = state.value.startDate ?: return@launch,
-                endDate = state.value.endDate ?: return@launch,
-                createdAt = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds()),
-                medicineType = state.value.selectedMedicineType,
-                schedules = datedSchedules
-            )
-            medicationRepository.insertMedicine(medication)
-            medicationScheduleRepository.insertMedicineSchedules(datedSchedules)
-            notificationScheduler.scheduleNextReminder()
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val startDate = state.value.startDate ?: return@withContext
+                val endDate = state.value.endDate ?: return@withContext
+                val medicineId = state.value.currentMedicineId
+                val datedSchedules = buildDatedSchedules(
+                    medicineId = medicineId,
+                    startDate = startDate,
+                    endDate = endDate,
+                    frequency = state.value.selectedMedicineFrequency,
+                    baseSchedules = state.value.medicineSchedules
+                )
+                medication = Medicine(
+                    id = state.value.currentMedicineId,
+                    name = state.value.medicationName,
+                    dosage = state.value.dose.toIntOrNull() ?: 1,
+                    frequency = state.value.selectedMedicineFrequency,
+                    startDate = state.value.startDate ?: return@withContext,
+                    endDate = state.value.endDate ?: return@withContext,
+                    createdAt = Instant.fromEpochMilliseconds(
+                        Clock.System.now().toEpochMilliseconds()
+                    ),
+                    medicineType = state.value.selectedMedicineType,
+                    schedules = datedSchedules
+                )
+                medicationRepository.insertMedicine(medication)
+                medicationScheduleRepository.insertMedicineSchedules(datedSchedules)
+                notificationScheduler.scheduleNextReminder()
+            }
             _state.update { it.copy(isCreatingMedicine = false) }
-            _events.trySend(AddMedicationEvent.OnCreateMedicationSuccess(medication))
+            _events.trySend(
+                AddMedicationEvent.OnCreateMedicationSuccess(
+                    medication ?: return@launch
+                )
+            )
         }
     }
 
