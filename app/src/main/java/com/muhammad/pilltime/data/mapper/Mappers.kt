@@ -2,8 +2,10 @@ package com.muhammad.pilltime.data.mapper
 
 import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import com.muhammad.pilltime.data.local.entity.MedicineScheduleEntity
+import com.muhammad.pilltime.data.local.entity.ScheduleHistoryEntity
 import com.muhammad.pilltime.domain.model.Medicine
 import com.muhammad.pilltime.domain.model.MedicineSchedule
+import com.muhammad.pilltime.domain.model.ScheduleHistory
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -47,7 +49,9 @@ fun MedicineScheduleEntity.toMedicineSchedule(): MedicineSchedule {
         time = LocalTime(
             hour = medicineTime / 60,
             minute = medicineTime % 60
-        ), date = date?.let { Instant.fromEpochMilliseconds(it) }?.toLocalDateTime(timeZone = TimeZone.currentSystemDefault())?.date,
+        ),
+        date = date?.let { Instant.fromEpochMilliseconds(it) }
+            ?.toLocalDateTime(timeZone = TimeZone.currentSystemDefault())?.date,
         status = status, medicineId = medicineId,
     )
 }
@@ -58,6 +62,42 @@ fun MedicineSchedule.toMedicineScheduleEntity(): MedicineScheduleEntity {
         status = status,
         medicineTime = time.hour * 60 + time.minute,
         medicineId = medicineId,
-        date =  date?.atStartOfDayIn(timeZone = TimeZone.currentSystemDefault())?.toEpochMilliseconds()
+        date = date?.atStartOfDayIn(timeZone = TimeZone.currentSystemDefault())
+            ?.toEpochMilliseconds()
     )
 }
+
+fun ScheduleHistoryEntity.toScheduleHistory(): ScheduleHistory {
+    return ScheduleHistory(
+        id = id,
+        medicineId = medicineId,
+        scheduleId = scheduleId,
+        medicineName = medicineName,
+        frequency = frequency,
+        dosage = dosage,
+        status = status,
+        medicineType = medicineType,
+        medicineTime = LocalTime(
+            hour = medicineTime / 60,
+            minute = medicineTime % 60
+        ),
+        date = Instant.fromEpochMilliseconds(date)
+            .toLocalDateTime(TimeZone.currentSystemDefault()).date
+    )
+}
+
+fun ScheduleHistory.toScheduleHistoryEntity(): ScheduleHistoryEntity {
+    return ScheduleHistoryEntity(
+        id = id,
+        medicineId = medicineId,
+        scheduleId = scheduleId,
+        medicineName = medicineName,
+        frequency = frequency,
+        dosage = dosage,
+        status = status,
+        medicineType = medicineType,
+        medicineTime = medicineTime.hour * 60 + medicineTime.minute,
+        date = date.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+    )
+}
+

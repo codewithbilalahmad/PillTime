@@ -1,6 +1,6 @@
 package com.muhammad.pilltime.data.repository
 
-import com.muhammad.pilltime.data.local.dao.MedicineDto
+import com.muhammad.pilltime.data.local.dao.MedicineDao
 import com.muhammad.pilltime.data.local.dao.MedicineScheduleDao
 import com.muhammad.pilltime.data.mapper.toMedicine
 import com.muhammad.pilltime.data.mapper.toMedicineEntity
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class MedicationRepositoryImp(
-    private val medicineDto: MedicineDto,
+    private val medicineDto: MedicineDao,
     private val medicineScheduleDao: MedicineScheduleDao,
 ) : MedicationRepository {
     override suspend fun insertMedicine(medicine: Medicine) {

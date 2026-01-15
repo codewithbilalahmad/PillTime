@@ -8,7 +8,7 @@ import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MedicineDto {
+interface MedicineDao {
     @Query("SELECT * FROM MedicineEntity ORDER BY createdAt DESC")
     fun getAllMedicines(): Flow<List<MedicineEntity>>
 

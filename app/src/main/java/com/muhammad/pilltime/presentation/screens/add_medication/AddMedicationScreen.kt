@@ -87,7 +87,6 @@ fun AddMedicationScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
-
             DashedHorizontalDivider(modifier = Modifier.fillMaxWidth())
         }
     }) { paddingValues ->

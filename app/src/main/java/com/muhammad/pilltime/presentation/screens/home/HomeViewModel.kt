@@ -7,25 +7,31 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muhammad.pilltime.PillTimeApplication
+import com.muhammad.pilltime.domain.model.ScheduleHistory
 import com.muhammad.pilltime.domain.model.ScheduleStatus
 import com.muhammad.pilltime.domain.repository.MedicationRepository
 import com.muhammad.pilltime.domain.repository.MedicationScheduleRespository
+import com.muhammad.pilltime.domain.repository.ScheduleHistoryRepository
 import com.muhammad.pilltime.domain.repository.SettingPreferences
 import com.muhammad.pilltime.utils.canScheduleExactAlarms
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import java.util.UUID
 
 class HomeViewModel(
     private val medicationRepository: MedicationRepository,
     private val settingPreferences: SettingPreferences,
     private val medicationScheduleRepository: MedicationScheduleRespository,
+    private val scheduleHistoryRepository: ScheduleHistoryRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = combine(
@@ -133,14 +139,37 @@ class HomeViewModel(
         status: ScheduleStatus,
         medicineId: Long,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            val medicine = medicationRepository.getMedicineById(medicineId).firstOrNull() ?: return@launch
+            val schedule = medicationScheduleRepository.getScheduleById(scheduleId).firstOrNull()
+                ?: return@launch
             medicationScheduleRepository.updateMedicineScheduleStatus(
                 scheduleId = scheduleId,
                 status = status
             )
+            scheduleHistoryRepository.insertScheduleHistory(
+                ScheduleHistory(
+                    id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
+                    scheduleId = scheduleId,
+                    medicineId = medicineId,
+                    status = status,
+                    medicineName = medicine.name,
+                    date = schedule.date ?: return@launch,
+                    medicineTime = schedule.time,
+                    dosage = medicine.dosage,
+                    frequency = medicine.frequency,
+                    medicineType = medicine.medicineType
+                )
+            )
         }
         _events.trySend(HomeEvent.ScrollToMedicine(medicineId = medicineId))
-        onAction(HomeAction.OnToggleMedicineSchedules(medicineId = medicineId))
+        _state.update { state ->
+            if (medicineId in state.expandedMedicineIds) {
+                state
+            } else {
+                state.copy(expandedMedicineIds = state.expandedMedicineIds + medicineId)
+            }
+        }
     }
 
 

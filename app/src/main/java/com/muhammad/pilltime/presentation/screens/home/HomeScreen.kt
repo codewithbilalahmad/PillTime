@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarExitDirection
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -40,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.muhammad.pilltime.R
 import com.muhammad.pilltime.presentation.components.AppAlertDialog
+import com.muhammad.pilltime.presentation.components.BottomNavigationBar
 import com.muhammad.pilltime.presentation.navigation.Destinations
 import com.muhammad.pilltime.presentation.screens.home.components.HomeHeader
 import com.muhammad.pilltime.presentation.screens.home.components.medicationDataSection
@@ -49,6 +55,7 @@ import com.muhammad.pilltime.utils.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val context = LocalContext.current
@@ -56,6 +63,7 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val layoutDirection = LocalLayoutDirection.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = FloatingToolbarExitDirection.Bottom)
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isNotificationPermissionPermenentlyDenied =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -87,33 +95,44 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
         delay(3000L)
         viewModel.onAction(HomeAction.OnCheckReminderPermissions)
     }
-    Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
-                start = paddingValues.calculateLeftPadding(layoutDirection = layoutDirection),
-                end = paddingValues.calculateEndPadding(layoutDirection = layoutDirection),
-                bottom = paddingValues.calculateBottomPadding(),
-            ), state = listState, verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item("HomeHeader") {
-                HomeHeader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateItem(), username = state.username, onAddMedicationScreen = {
-                        navHostController.navigate(Destinations.AddMedicationScreen)
-                    }
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .nestedScroll(scrollBehavior)) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
+                    start = paddingValues.calculateLeftPadding(layoutDirection = layoutDirection),
+                    end = paddingValues.calculateEndPadding(layoutDirection = layoutDirection),
+                    bottom = paddingValues.calculateBottomPadding(),
+                ), state = listState, verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item("HomeHeader") {
+                    HomeHeader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateItem(), username = state.username, onAddMedicationScreen = {
+                            navHostController.navigate(Destinations.AddMedicationScreen)
+                        }
+                    )
+                }
+                medicationDataSection(
+                    medications = state.medications,
+                    onDateSelected = { date ->
+                        viewModel.onAction(HomeAction.OnFilterDataSelected(date))
+                    }, onToggleMedicineSchedules = { medicineId ->
+                        viewModel.onAction(HomeAction.OnToggleMedicineSchedules(medicineId))
+                    }, onDeleteMedicine = { medicineId ->
+                        viewModel.onAction(HomeAction.OnDeleteMedicineById(medicineId))
+                    }, isMedicinesLoading = state.isMedicinesLoading,
+                    selectedDate = state.selectedFilterDate
                 )
             }
-            medicationDataSection(
-                medications = state.medications,
-                onDateSelected = { date ->
-                    viewModel.onAction(HomeAction.OnFilterDataSelected(date))
-                }, onToggleMedicineSchedules = { medicineId ->
-                    viewModel.onAction(HomeAction.OnToggleMedicineSchedules(medicineId))
-                }, onDeleteMedicine = { medicineId ->
-                    viewModel.onAction(HomeAction.OnDeleteMedicineById(medicineId))
-                }, isMedicinesLoading = state.isMedicinesLoading,
-                selectedDate = state.selectedFilterDate
+            BottomNavigationBar(
+                navController = navHostController,
+                scrollBehavior = scrollBehavior,
+                modifier = Modifier.align(
+                    Alignment.BottomCenter
+                )
             )
         }
     }
@@ -211,8 +230,11 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
                     }
                     Text(
                         text = stringResource(R.string.allow_notifications_and_reminders),
-                        modifier= Modifier.padding(horizontal = 24.dp),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
                     )
                 }
             },

@@ -6,14 +6,16 @@ import androidx.room.TypeConverters
 import com.muhammad.pilltime.data.local.converters.MedicineFrequencyConverter
 import com.muhammad.pilltime.data.local.converters.MedicineTypeConverter
 import com.muhammad.pilltime.data.local.converters.ScheduleStatusConverter
-import com.muhammad.pilltime.data.local.dao.MedicineDto
+import com.muhammad.pilltime.data.local.dao.MedicineDao
 import com.muhammad.pilltime.data.local.dao.MedicineScheduleDao
+import com.muhammad.pilltime.data.local.dao.ScheduleHistoryDao
 import com.muhammad.pilltime.data.local.entity.MedicineEntity
 import com.muhammad.pilltime.data.local.entity.MedicineScheduleEntity
+import com.muhammad.pilltime.data.local.entity.ScheduleHistoryEntity
 
 @Database(
-    entities = [MedicineEntity::class, MedicineScheduleEntity::class],
-    version = 8,
+    entities = [MedicineEntity::class, MedicineScheduleEntity::class, ScheduleHistoryEntity::class],
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(
@@ -21,6 +23,7 @@ import com.muhammad.pilltime.data.local.entity.MedicineScheduleEntity
     ScheduleStatusConverter::class
 )
 abstract class PillTimeDatabase : RoomDatabase() {
-    abstract val medicineDao: MedicineDto
-    abstract val medicineScheduleDao : MedicineScheduleDao
+    abstract val medicineDao: MedicineDao
+    abstract val medicineScheduleDao: MedicineScheduleDao
+    abstract val scheduleHistoryDao : ScheduleHistoryDao
 }
