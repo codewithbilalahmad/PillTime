@@ -17,6 +17,7 @@ import com.muhammad.pilltime.domain.repository.SettingPreferences
 import com.muhammad.pilltime.presentation.screens.add_medication.AddMedicationViewModel
 import com.muhammad.pilltime.presentation.screens.boarding.BoardingViewModel
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
+import com.muhammad.pilltime.presentation.screens.medication_history.MedicationHistoryViewModel
 import com.muhammad.pilltime.presentation.screens.user_name.UsernameViewModel
 import com.muhammad.pilltime.utils.Constants.DATABASE_NAME
 import kotlinx.coroutines.Dispatchers
@@ -48,5 +49,6 @@ val appModule = module {
     viewModelOf(::BoardingViewModel)
     viewModelOf(::UsernameViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::MedicationHistoryViewModel)
     viewModelOf(::AddMedicationViewModel)
 }
