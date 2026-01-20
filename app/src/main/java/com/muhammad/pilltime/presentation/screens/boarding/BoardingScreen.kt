@@ -1,13 +1,24 @@
 package com.muhammad.pilltime.presentation.screens.boarding
 
+import android.app.Activity
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,14 +31,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,7 +50,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,11 +62,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.muhammad.pilltime.R
+import com.muhammad.pilltime.presentation.components.AppTitleText
 import com.muhammad.pilltime.presentation.components.PagerDotIndicator
 import com.muhammad.pilltime.presentation.components.PrimaryButton
 import com.muhammad.pilltime.presentation.components.SecondaryButton
 import com.muhammad.pilltime.presentation.navigation.Destinations
-import com.muhammad.pilltime.utils.ObserveAsEvents
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -58,11 +76,41 @@ fun BoardingScreen(
     navHostController: NavHostController,
     viewModel: BoardingViewModel = koinViewModel(),
 ) {
+    val context = LocalContext.current
+    val activity = context as Activity
+    val window = activity.window
+    val backgroundColor = MaterialTheme.colorScheme.background
+    @Suppress("DEPRECATION")
+    DisposableEffect(Unit) {
+        window.statusBarColor = backgroundColor.toArgb()
+        onDispose {
+            window.statusBarColor = Color.Transparent.toArgb()
+        }
+    }
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState { state.boardingItems.size }
     val currentPage by remember {
         derivedStateOf { pagerState.currentPage }
+    }
+    val imageScale = remember { Animatable(0f) }
+    val boxScale = remember { Animatable(0f) }
+    LaunchedEffect(currentPage) {
+        imageScale.snapTo(0f)
+        boxScale.snapTo(0f)
+        imageScale.animateTo(
+            1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        )
+        boxScale.animateTo(
+            1f, animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -104,7 +152,7 @@ fun BoardingScreen(
                     },
                     contentPadding = PaddingValues(vertical = 16.dp),
                     text = if (currentPage < pagerState.pageCount - 1) stringResource(R.string.next) else stringResource(
-                        R.string.start
+                        R.string.get_started
                     )
                 )
             }
@@ -133,25 +181,61 @@ fun BoardingScreen(
                         .padding(horizontal = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = painterResource(currentBoarding.image),
-                        contentDescription = null, modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = stringResource(currentBoarding.title),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = boxScale.value
+                                    scaleY = boxScale.value
+                                }
+                                .size(250.dp)
+                                .border(
+                                    width = 6.dp,
+                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    shape = CircleShape
+                                )
+                                .padding(24.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceContainerLow,
+                                    CircleShape
+                                )
                         )
-                    )
+                        Image(
+                            painter = painterResource(currentBoarding.image),
+                            contentDescription = null, modifier = Modifier
+                                .graphicsLayer {
+                                    scaleX = imageScale.value
+                                    scaleY = imageScale.value
+                                }
+                                .fillMaxSize()
+                        )
+                    }
+                    AnimatedContent(currentBoarding.title, transitionSpec = {
+                        slideInVertically { -it } + expandVertically { -it } + fadeIn() togetherWith slideOutVertically { -it } + shrinkVertically { -it } + fadeOut()
+                    }) { title ->
+                        AppTitleText(
+                            text = stringResource(title),
+                            textStyle = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
                     Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(currentBoarding.description),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.surface,
-                            textAlign = TextAlign.Center
+                    AnimatedContent(currentBoarding.description, transitionSpec = {
+                        slideInVertically { -it } + expandVertically { -it } + fadeIn() togetherWith slideOutVertically { -it } + shrinkVertically { -it } + fadeOut()
+                    }){description ->
+                        Text(
+                            text = stringResource(description),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.surface,
+                                textAlign = TextAlign.Center
+                            )
                         )
-                    )
+                    }
                     Spacer(Modifier.height(16.dp))
                     PagerDotIndicator(pagerState = pagerState)
                     Spacer(Modifier.height(32.dp))

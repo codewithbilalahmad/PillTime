@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
@@ -23,15 +25,27 @@ class MedicationHistoryViewModel(
     val state = combine(
         _state, scheduleHistoryRepository.getSchedulesHistory()
     ) { state, medicationHistory ->
-        state.copy(medicationHistory = medicationHistory.groupByRelativeDate())
+        state.copy(medicationHistory = medicationHistory.groupByRelativeDate(state.selectedFilterDate))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), MedicationHistoryState())
 
-    private fun List<ScheduleHistory>.groupByRelativeDate(): Map<UiText, List<ScheduleHistory>> {
+    fun onAction(action: MedicationHistoryAction){
+        when(action){
+            is MedicationHistoryAction.OnFilterDateChange -> onFilterDateChange(action.date)
+        }
+    }
+
+    private fun onFilterDateChange(date: LocalDate) {
+        _state.update { it.copy(selectedFilterDate = date) }
+    }
+
+    private fun List<ScheduleHistory>.groupByRelativeDate(selectedFilterDate: LocalDate?): Map<UiText, List<ScheduleHistory>> {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         val yesterday = today.minus(DatePeriod(days = 1))
         return this.sortedWith(
             compareByDescending<ScheduleHistory>{ it.date }.thenByDescending { it.medicineTime }
-        ).groupBy { history ->
+        ).filter { scheduleHistory ->
+           selectedFilterDate == null || scheduleHistory.date == selectedFilterDate
+        }.groupBy { history ->
             when(history.date){
                 today -> UiText.StringResource(R.string.today)
                 yesterday -> UiText.StringResource(R.string.yesterday)

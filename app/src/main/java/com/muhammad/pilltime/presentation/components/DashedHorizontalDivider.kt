@@ -17,7 +17,7 @@ fun DashedHorizontalDivider(
     color: Color = MaterialTheme.colorScheme.surfaceVariant,
     thickness: Float = 4f,
     dashLength: Float = 12f,
-    gapLength: Float = 2f,
+    gapLength: Float = 6f,
 ) {
     val density = LocalDensity.current
     val heightDp = with(density) {

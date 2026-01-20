@@ -11,6 +11,7 @@ import com.muhammad.pilltime.presentation.screens.add_medication_success.AddMedi
 import com.muhammad.pilltime.presentation.screens.boarding.BoardingScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeScreen
 import com.muhammad.pilltime.presentation.screens.home.HomeViewModel
+import com.muhammad.pilltime.presentation.screens.medication_history.MedicationHistoryScreen
 import com.muhammad.pilltime.presentation.screens.user_name.UsernameScreen
 import kotlin.reflect.typeOf
 
@@ -43,6 +44,7 @@ fun AppNavigation(
             UsernameScreen(navHostController = navHostController)
         }
         composable<Destinations.MedicationHistoryScreen> {
+            MedicationHistoryScreen(navHostController = navHostController)
         }
     }
 }

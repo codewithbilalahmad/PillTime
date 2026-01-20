@@ -30,11 +30,11 @@ fun PagerDotIndicator(modifier: Modifier = Modifier, pagerState: PagerState) {
         items(pagerState.pageCount) { page ->
             val isSelected = page == pagerState.currentPage
             val background by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                targetValue = if (isSelected) MaterialTheme.colorScheme.error else Color.Transparent,
                 animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(), label = "background"
             )
             val borderColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                targetValue = if (isSelected) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
                 animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
                 label = "background"
             )

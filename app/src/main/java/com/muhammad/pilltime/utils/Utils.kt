@@ -35,7 +35,7 @@ fun LocalTime.formattedTime(): String {
     }
     val minute = this.minute
     val amPm = if (hour24 < 12) "AM" else "PM"
-    return String.format("%02d:%02d %s", hour, minute, amPm)
+    return String.format("%02d : %02d %s", hour, minute, amPm)
 }
 
 fun LocalDate.formattedDuration(otherDate: LocalDate): String {

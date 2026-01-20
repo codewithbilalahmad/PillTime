@@ -48,22 +48,24 @@ fun UsernameScreen(
     viewModel: UsernameViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ObserveAsEvents(viewModel.events, onEvent = {event ->
-        when(event){
+    ObserveAsEvents(viewModel.events, onEvent = { event ->
+        when (event) {
             UsernameEvent.OnSaveUsernameDone -> {
                 navHostController.navigate(Destinations.HomeScreen)
             }
         }
     })
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        Column(modifier = Modifier.fillMaxWidth()){
+        Column(modifier = Modifier.fillMaxWidth()) {
             CenterAlignedTopAppBar(
                 title = {
                     Text(text = stringResource(R.string.username))
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {},
+                        onClick = {
+                            navHostController.navigateUp()
+                        },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.error,
                             contentColor = MaterialTheme.colorScheme.onError

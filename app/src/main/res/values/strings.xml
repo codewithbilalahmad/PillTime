@@ -83,4 +83,6 @@
     <string name="history">History</string>
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
+    <string name="schedule_history">Schedule History</string>
+    <string name="get_started">Get Started</string>
 </resources>
