@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class Boarding(
+    val index : Int,
     val image : Int,
     @get:StringRes val title : Int,
     @get:StringRes  val description : Int

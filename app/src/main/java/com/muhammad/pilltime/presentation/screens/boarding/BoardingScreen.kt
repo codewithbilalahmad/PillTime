@@ -90,8 +90,13 @@ fun BoardingScreen(
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState { state.boardingItems.size }
-    val currentPage by remember {
+    val currentPage by remember(pagerState) {
         derivedStateOf { pagerState.currentPage }
+    }
+    val currentBoarding by remember(currentPage) {
+        derivedStateOf {
+            state.boardingItems[currentPage]
+        }
     }
     val imageScale = remember { Animatable(0f) }
     val boxScale = remember { Animatable(0f) }
@@ -164,7 +169,6 @@ fun BoardingScreen(
                 .fillMaxHeight(0.95f)
                 .padding(paddingValues)
         ) { page ->
-            val currentBoarding = state.boardingItems[page]
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -213,28 +217,34 @@ fun BoardingScreen(
                                 .fillMaxSize()
                         )
                     }
-                    AnimatedContent(currentBoarding.title, transitionSpec = {
-                        slideInVertically { -it } + expandVertically { -it } + fadeIn() togetherWith slideOutVertically { -it } + shrinkVertically { -it } + fadeOut()
-                    }) { title ->
-                        AppTitleText(
-                            text = stringResource(title),
-                            textStyle = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
+
+                    AnimatedContent(currentBoarding, transitionSpec = {
+                        if(targetState.index > initialState.index){
+                            slideInVertically { -it } + expandVertically { -it } + fadeIn() togetherWith slideOutVertically { -it } + shrinkVertically { -it } + fadeOut()
+                        } else{
+                            slideInVertically { it } + expandVertically { it } + fadeIn() togetherWith slideOutVertically { it } + shrinkVertically { it } + fadeOut()
+                        }
+                    }) { boarding ->
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            AppTitleText(
+                                text = stringResource(boarding.title),
+                                textStyle = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
                             )
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    AnimatedContent(currentBoarding.description, transitionSpec = {
-                        slideInVertically { -it } + expandVertically { -it } + fadeIn() togetherWith slideOutVertically { -it } + shrinkVertically { -it } + fadeOut()
-                    }){description ->
-                        Text(
-                            text = stringResource(description),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = MaterialTheme.colorScheme.surface,
-                                textAlign = TextAlign.Center
+                            Text(
+                                text = stringResource(boarding.description),
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    textAlign = TextAlign.Center
+                                )
                             )
-                        )
+                        }
                     }
                     Spacer(Modifier.height(16.dp))
                     PagerDotIndicator(pagerState = pagerState)

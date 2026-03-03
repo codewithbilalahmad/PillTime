@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.koin.androidx.compose)
-    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

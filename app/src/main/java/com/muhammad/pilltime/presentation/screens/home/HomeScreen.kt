@@ -63,7 +63,8 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
     val layoutDirection = LocalLayoutDirection.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = FloatingToolbarExitDirection.Bottom)
+    val scrollBehavior =
+        FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = FloatingToolbarExitDirection.Bottom)
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isNotificationPermissionPermenentlyDenied =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -95,9 +96,11 @@ fun HomeScreen(navHostController: NavHostController, viewModel: HomeViewModel) {
         delay(3000L)
         viewModel.onAction(HomeAction.OnCheckReminderPermissions)
     }
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .nestedScroll(scrollBehavior)) { paddingValues ->
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior)
+    ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
